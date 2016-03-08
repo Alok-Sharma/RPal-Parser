@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include "lexer.h"
+#include <algorithm>
 
 using namespace std;
 

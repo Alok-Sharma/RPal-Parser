@@ -4,6 +4,7 @@
 #include <fstream>
 #include "lexer.cpp"
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 ifstream in;
