@@ -16,20 +16,28 @@ const string punctArr[] = {"(", ")", ";", ","};
 vector<string> punctuations (punctArr, punctArr + sizeof(punctArr) / sizeof(punctArr[0]));
 
 //TODO: %
-const string punctArr[] = {"+", "-", "*", "<", ">", "&", ".", "@", "/", ":", "=", "~", "|", "$", "!", "#", "^", "_", "?"};
+const string opArr[] = {"+", "-", "*", "<", ">", "&", ".", "@", "/", ":", "=", "~", "|", "$", "!", "#", "^", "_", "?"};
 vector<string> operators (opArr, opArr + sizeof(opArr) / sizeof(opArr[0]));
 
 //constant used for checking if we want to check the next token is a number
 const string NUMBER = "number";
 
+const string STRING = "string";
+
 //main function to check if the next token is the same as the supplied argument
 bool isNextToken(string input) {
-	if(find(identifiers.begin(), identifiers.end(), input) != identifiers.end()) {
+	ignoreCommentsAndSpaces();
+
+	if(contains(identifiers, input)) {
 		return isIdentifier(input);
-	} else if(find(punctuations.begin(), punctuations.end(), input) != punctuations.end()) {
+	} else if(contains(punctuations, input)) {
 		return isPunctuation(input);
 	} else if(input == NUMBER) {
 		return isNumber();
+	} else if(contains(operators, string(1,input[0]))) {
+		return isOperator(input);
+	} else if(input == STRING) {
+		return isString();
 	}
 	return false;
 }
@@ -38,10 +46,6 @@ bool isNextToken(string input) {
 bool isIdentifier(string input) {
 	char ch;
 	string token;
-	//removes spaces
-	while(isspace(in.peek())) {
-		in.get();
-	}
 
 	if(isalpha(in.peek())) {
 		while(isalpha(in.peek()) || isdigit(in.peek()) || in.peek() == '_'){
@@ -59,11 +63,6 @@ bool isIdentifier(string input) {
 
 //helper function to check if next token is a punctuation
 bool isPunctuation(string input) {
-	//removes spaces
-	while(isspace(in.peek())) {
-		in.get();
-	}
-
 	char ch = in.get();
 	if(ch == input[0]){
 		return true;
@@ -75,11 +74,6 @@ bool isPunctuation(string input) {
 
 //helper function to check if next token is a number
 bool isNumber() {
-	//removes spaces
-	while(isspace(in.peek())) {
-		in.get();
-	}
-
 	bool ret = false;
 	while(isdigit(in.peek())) {
 		in.get();
@@ -90,10 +84,97 @@ bool isNumber() {
 
 //helper function to check if next token is an operator
 bool isOperator(string input) {
-	
+	string result;
+	char ch;
+
+	while(contains(operators, string(1, in.peek()))) {
+		ch = in.get();
+		result = result + ch;
+	}
+
+	if(result == input) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
-//If the string read from input does not match what we're looking for, then this helper function
+//helper function to check if next token is a string
+bool isString() {
+	char ch;
+	string token;
+
+	if(in.peek() == '\"') {
+		ch = in.get();
+		token = token + ch;
+		while(in.peek() != '\"') {
+			ch = in.get();
+			token = token + ch;
+			if(isEscapedQuotes()) {
+				ch = in.get(); //ch here will be the second double quote(thus skipping over it), of an escaped double quote.
+				token = token + ch + ch;
+			}
+			if(in.eof()) {
+				return false;
+			}
+		}
+		ch = in.get();
+		token = token + ch;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool isEscapedQuotes() {
+	char ch;
+	if(in.peek() != '\"') {
+		return false;
+	} else {
+		ch = in.get();
+		if(in.peek() != '\"') {
+			in.putback(ch);
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+
+void ignoreCommentsAndSpaces() {
+	string line;
+	ignoreSpace();
+	while(isCommentBegin()) {
+		//go to end of line;
+		getline(in, line);
+		cout << "ignoring " << line << "\n";
+		ignoreSpace();
+	}
+}
+
+bool isCommentBegin() {
+	string commentBegin;
+	char ch = in.get();
+	commentBegin = commentBegin + ch;
+	ch = in.get();
+	commentBegin = commentBegin + ch;
+
+	if(commentBegin == "//") {
+		return true;
+	} else {
+		revert(commentBegin);
+		return false;
+	}
+}
+
+void ignoreSpace() {
+	//removes spaces
+	while(isspace(in.peek())) {
+		in.get();
+	}
+}
+
+// Helper function - If the string read from input does not match what we're looking for, then this helper function
 // can be used to take reset the input file stream head pointer.
 void revert(string input) {
 	int length = input.size();
@@ -103,15 +184,32 @@ void revert(string input) {
     }
 }
 
+// Helper function - check if the given input exists within input vector
+bool contains(vector<string> vec, string input) {
+	if(find(vec.begin(), vec.end(), input) != vec.end()) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 int main(int argc, char** argv) {
 	string file;
 	file = argv[1];
     in.open(file.c_str());
 
-    string check = NUMBER;
+    string check = STRING;
     if(isNextToken(check)){
     	cout << "is " << check << "\n";
     } else {
     	cout << "not " << check << "\n";
     }
+
+    if(isNextToken(check)){
+    	cout << "is " << check << "\n";
+    } else {
+    	cout << "not " << check << "\n";
+    }
+
+    in.close();
 }
