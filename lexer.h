@@ -17,6 +17,9 @@ public:
 	void ignoreCommentsAndSpaces();
 	bool isEscapedQuotes();
 	void read(std::string);
+	void readIdentifier();
+	void readNumber();
+	void readString();
 	bool isCommentBegin();
 
 //lexer : check next token functions.
@@ -32,8 +35,17 @@ class Parser {
 public:
 	//Parser functions
 	void E();
+
+	void Ap();
+
+	void R();
+	void Rn();
+
 	void D();
+	void Da();
+	void Dr();
 	void Db();
+
 	void Vb();
 	void Vl();
 };

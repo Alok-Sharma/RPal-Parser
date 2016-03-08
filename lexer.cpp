@@ -49,11 +49,48 @@ string Lexer::isNextToken(string input) {
 }
 
 void Lexer::read(string input) {
+	ignoreCommentsAndSpaces();
+
 	char ch;
-	string token;
+	string token = "";
 	for(int i = 0; i < input.length(); i++) {
 		ch =in.get();
 		token = token + ch;
+	}
+	cout << "I read: " << token << "\n";
+	if(token != input) {
+		cout << "Error, expected " << input <<"\n";
+	}
+}
+
+void Lexer::readIdentifier() {
+	string token = isNextToken(IDENTIFIER);
+	cout << "read identifier " << token << "\n";
+	if(token != "") {
+		//found the identifier
+		read(token);
+	} else {
+		cout << "Error, expected IDENTIFIER\n";
+	}
+}
+
+void Lexer::readNumber() {
+	string token = isNextToken(NUMBER);
+	if(token != "") {
+		//found the number
+		read(token);
+	} else {
+		cout << "Error, expected NUMBER\n";
+	}
+}
+
+void Lexer::readString() {
+	string token = isNextToken(STRING);
+	if(token != "") {
+		//found string
+		read(token);
+	} else {
+		cout << "Error, expected STRING\n";
 	}
 }
 
@@ -66,6 +103,7 @@ string Lexer::isIdentifier(string input) {
 		while(isalpha(in.peek()) || isdigit(in.peek()) || in.peek() == '_'){
         	token += in.get();
     	}
+    	cout << "is identifier before reverting " << token <<"\n";
     	revert(token);
     	if(input == IDENTIFIER || token == input) {
     		return token;
@@ -204,10 +242,10 @@ void Lexer::ignoreSpace() {
 void Lexer::revert(string input) {
 	int length = input.length();
 	// cout << "reverting " << input << " length " << length << "\n";
-    const char* ch = input.c_str();
     for(int i = length - 1; i >= 0; i--){
-        in.putback(ch[i]);
+        in.putback(input[i]);
     }
+    cout << "after puting back " << input << " peeked " << string(1,in.peek()) << "\n";
 }
 
 // Helper function - check if the given input exists within input vector
