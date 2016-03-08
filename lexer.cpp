@@ -2,10 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "main.h"
+#include "lexer.h"
 
 using namespace std;
-ifstream in;
 
 //vector of identifier keywords 
 const string idArr[] = {"let", "in", "fn", "where", "aug", "not", "or", "gr", "ge", "ls", "le", "eq", "ne", "true", "false", "nil", "dummy", "within", "and", "rec", "list"};
@@ -24,26 +23,42 @@ const string NUMBER = "number";
 
 const string STRING = "string";
 
+const string IDENTIFIER = "identifier";
+
 //main function to check if the next token is the same as the supplied argument
-bool isNextToken(string input) {
+string Lexer::isNextToken(string input) {
 	ignoreCommentsAndSpaces();
 
 	if(contains(identifiers, input)) {
 		return isIdentifier(input);
+		// TODO: buildtree
 	} else if(contains(punctuations, input)) {
 		return isPunctuation(input);
 	} else if(input == NUMBER) {
 		return isNumber();
+		//TODO: buildtree
 	} else if(contains(operators, string(1,input[0]))) {
 		return isOperator(input);
 	} else if(input == STRING) {
 		return isString();
+		//TODO: buildtree
+	} else if(input == IDENTIFIER) {
+		return isIdentifier(IDENTIFIER);
 	}
-	return false;
+	return "";
+}
+
+void Lexer::read(string input) {
+	char ch;
+	string token;
+	for(int i = 0; i < input.length(); i++) {
+		ch =in.get();
+		token = token + ch;
+	}
 }
 
 //helper function to check if next token is an identifier
-bool isIdentifier(string input) {
+string Lexer::isIdentifier(string input) {
 	char ch;
 	string token;
 
@@ -51,39 +66,41 @@ bool isIdentifier(string input) {
 		while(isalpha(in.peek()) || isdigit(in.peek()) || in.peek() == '_'){
         	token += in.get();
     	}
-
-    	if(token == input) {
-    		return true;
+    	revert(token);
+    	if(input == IDENTIFIER || token == input) {
+    		return token;
     	} else {
-    		revert(token);
+    		return "";
     	}
 	}
-    return false;
+	return "";
 }
 
 //helper function to check if next token is a punctuation
-bool isPunctuation(string input) {
-	char ch = in.get();
+string Lexer::isPunctuation(string input) {
+	char ch = in.peek();
 	if(ch == input[0]){
-		return true;
+		return input;
 	} else {
-		in.putback(ch);
-		return false;
+		return "";
 	}
 }
 
 //helper function to check if next token is a number
-bool isNumber() {
-	bool ret = false;
+string Lexer::isNumber() {
+	char ch;
+	string token = "";
+
 	while(isdigit(in.peek())) {
-		in.get();
-		ret = true;
+		ch = in.get();
+		token = token + ch;
 	}
-	return ret;
+	revert(token);
+	return token;
 }
 
 //helper function to check if next token is an operator
-bool isOperator(string input) {
+string Lexer::isOperator(string input) {
 	string result;
 	char ch;
 
@@ -91,16 +108,16 @@ bool isOperator(string input) {
 		ch = in.get();
 		result = result + ch;
 	}
-
+	revert(result);
 	if(result == input) {
-		return true;
+		return result;
 	} else {
-		return false;
+		return "";
 	}
 }
 
 //helper function to check if next token is a string
-bool isString() {
+string Lexer::isString() {
 	char ch;
 	string token;
 
@@ -114,19 +131,22 @@ bool isString() {
 				ch = in.get(); //ch here will be the second double quote(thus skipping over it), of an escaped double quote.
 				token = token + ch + ch;
 			}
-			if(in.eof()) {
-				return false;
+			if(in.peek() == EOF) {
+				revert(token);
+				return "";
 			}
 		}
 		ch = in.get();
 		token = token + ch;
-		return true;
+		revert(token);
+		return token;
 	} else {
-		return false;
+		return "";
 	}
 }
 
-bool isEscapedQuotes() {
+//helper function to skip overescaped quotes. Used in isString.
+bool Lexer::isEscapedQuotes() {
 	char ch;
 	if(in.peek() != '\"') {
 		return false;
@@ -141,7 +161,7 @@ bool isEscapedQuotes() {
 	}
 }
 
-void ignoreCommentsAndSpaces() {
+void Lexer::ignoreCommentsAndSpaces() {
 	string line;
 	ignoreSpace();
 	while(isCommentBegin()) {
@@ -152,12 +172,17 @@ void ignoreCommentsAndSpaces() {
 	}
 }
 
-bool isCommentBegin() {
+bool Lexer::isCommentBegin() {
 	string commentBegin;
-	char ch = in.get();
-	commentBegin = commentBegin + ch;
-	ch = in.get();
-	commentBegin = commentBegin + ch;
+
+	if(in.peek() ==  EOF) {
+		// cout << "not end of file\n";
+		commentBegin = in.get();
+	}
+	if(in.peek() == EOF) {
+		// cout << "not end of file\n";
+		commentBegin += in.get();
+	}
 
 	if(commentBegin == "//") {
 		return true;
@@ -167,7 +192,7 @@ bool isCommentBegin() {
 	}
 }
 
-void ignoreSpace() {
+void Lexer::ignoreSpace() {
 	//removes spaces
 	while(isspace(in.peek())) {
 		in.get();
@@ -176,8 +201,9 @@ void ignoreSpace() {
 
 // Helper function - If the string read from input does not match what we're looking for, then this helper function
 // can be used to take reset the input file stream head pointer.
-void revert(string input) {
-	int length = input.size();
+void Lexer::revert(string input) {
+	int length = input.length();
+	// cout << "reverting " << input << " length " << length << "\n";
     const char* ch = input.c_str();
     for(int i = length - 1; i >= 0; i--){
         in.putback(ch[i]);
@@ -185,31 +211,10 @@ void revert(string input) {
 }
 
 // Helper function - check if the given input exists within input vector
-bool contains(vector<string> vec, string input) {
+bool Lexer::contains(vector<string> vec, string input) {
 	if(find(vec.begin(), vec.end(), input) != vec.end()) {
 		return true;
 	} else {
 		return false;
 	}
-}
-
-int main(int argc, char** argv) {
-	string file;
-	file = argv[1];
-    in.open(file.c_str());
-
-    string check = STRING;
-    if(isNextToken(check)){
-    	cout << "is " << check << "\n";
-    } else {
-    	cout << "not " << check << "\n";
-    }
-
-    if(isNextToken(check)){
-    	cout << "is " << check << "\n";
-    } else {
-    	cout << "not " << check << "\n";
-    }
-
-    in.close();
 }
