@@ -33,6 +33,7 @@ public:
 
 class Parser {
 public:
+	void Test();
 	//Parser functions
 	void E();
 

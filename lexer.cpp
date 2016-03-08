@@ -211,23 +211,25 @@ void Lexer::ignoreCommentsAndSpaces() {
 }
 
 bool Lexer::isCommentBegin() {
-	string commentBegin;
+	string commentBegin = "";
 
-	if(in.peek() ==  EOF) {
+	if(in.peek() !=  EOF) {
 		// cout << "not end of file\n";
 		commentBegin = in.get();
 	}
-	if(in.peek() == EOF) {
+	if(in.peek() != EOF) {
 		// cout << "not end of file\n";
 		commentBegin += in.get();
 	}
 
 	if(commentBegin == "//") {
 		return true;
-	} else {
+	} else if(commentBegin != "") {
+		cout << "before reverting in comment\n";
 		revert(commentBegin);
 		return false;
 	}
+	return false;
 }
 
 void Lexer::ignoreSpace() {
