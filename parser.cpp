@@ -5,12 +5,14 @@
 #include "lexer.cpp"
 #include <vector>
 #include <algorithm>
+#include <stack>
 
 using namespace std;
 ifstream in;
 ofstream out;
 Lexer lexer;
 bool reachedEof;
+stack<Node*> s;
 
 void Parser::E() {
 	if(lexer.isNextToken("let") == "let") {
@@ -18,7 +20,7 @@ void Parser::E() {
 		D();
 		lexer.read("in");
 		E();
-		//buildtree
+		BuildTree("let", 2);
 	} else if(lexer.isNextToken("fn") == "fn") {
 		lexer.read("fn");
 		int n = 1;
@@ -29,6 +31,7 @@ void Parser::E() {
 		}
 		lexer.read(".");
 		E();
+		BuildTree("lambda", n+1);
 	} else {
 		Ew();
 	}
@@ -39,14 +42,21 @@ void Parser::Ew() {
 	if(lexer.isNextToken("where") == "where") {
 		lexer.read("where");
 		Dr();
+		BuildTree("where", 2);
 	}
 }
 
 void Parser::T() {
 	Ta();
-	while(lexer.isNextToken(",") == ",") {
-		lexer.read(",");
-		Ta();
+
+	if(lexer.isNextToken(",") == ",") {
+		int n = 1;
+		while(lexer.isNextToken(",") == ",") {
+			lexer.read(",");
+			Ta();
+			n++;
+		}
+		BuildTree("tau", n);
 	}
 }
 
@@ -55,6 +65,7 @@ void Parser::Ta() {
 	while(lexer.isNextToken("aug") == "aug") {
 		lexer.read("aug");
 		Tc();
+		BuildTree("aug", 2);
 	}
 }
 
@@ -65,6 +76,7 @@ void Parser::Tc() {
 		Tc();
 		lexer.read("|");
 		Tc();
+		BuildTree("->", 3);
 	}
 }
 
@@ -73,6 +85,7 @@ void Parser::B() {
 	while(lexer.isNextToken("or") == "or") {
 		lexer.read("or");
 		Bt();
+		BuildTree("or", 2);
 	}
 }
 
@@ -81,14 +94,18 @@ void Parser::Bt() {
 	while(lexer.isNextToken("&") == "&") {
 		lexer.read("&");
 		Bs();
+		BuildTree("&", 2);
 	}
 }
 
 void Parser::Bs() {
 	if(lexer.isNextToken("not") == "not") {
 		lexer.read("not");
+		Bp();
+		BuildTree("not", 1);
+	} else {
+		Bp();
 	}
-	Bp();
 }
 
 void Parser::Bp() {
@@ -97,33 +114,43 @@ void Parser::Bp() {
 	if(lexer.isNextToken("gr") == "gr") {
 		lexer.read("gr");
 		A();
+		BuildTree("gr", 2);
 	} else if(lexer.isNextToken(">") == ">") {
 		lexer.read(">");
 		A();
+		BuildTree("gr", 2);
 	} else if(lexer.isNextToken("ge") == "ge") {
 		lexer.read("ge");
 		A();
+		BuildTree("ge", 2);
 	} else if(lexer.isNextToken(">=") == ">=") {
 		lexer.read(">=");
 		A();
+		BuildTree("ge", 2);
 	} else if(lexer.isNextToken("ls") == "ls") {
 		lexer.read("ls");
 		A();
+		BuildTree("ls", 2);
 	} else if(lexer.isNextToken("<") == "<") {
 		lexer.read("<");
 		A();
+		BuildTree("ls", 2);
 	} else if(lexer.isNextToken("le") == "le") {
 		lexer.read("le");
 		A();
+		BuildTree("le", 2);
 	} else if(lexer.isNextToken("<=") == "<=") {
 		lexer.read("<=");
 		A();
+		BuildTree("le", 2);
 	} else if(lexer.isNextToken("eq") == "eq") {
 		lexer.read("eq");
 		A();
+		BuildTree("eq", 2);
 	} else if(lexer.isNextToken("ne") == "ne") {
 		lexer.read("ne");
 		A();
+		BuildTree("ne", 2);
 	}
 }
 
@@ -134,6 +161,7 @@ void Parser::A() {
 	} else if(lexer.isNextToken("-") == "-") {
 		lexer.read("-");
 		At();
+		BuildTree("neg", 1);
 	} else {
 		At();
 	}
@@ -142,11 +170,11 @@ void Parser::A() {
 		if(lexer.isNextToken("+") == "+") {
 			lexer.read("+");
 			At();
-			//buildtree +
+			BuildTree("+", 2);
 		} else {
 			lexer.read("-");
 			At();
-			//buildtree -
+			BuildTree("-", 2);
 		}
 	}
 }
@@ -156,9 +184,11 @@ void Parser::At() {
 	if(lexer.isNextToken("*") == "*") {
 		lexer.read("*");
 		At();
+		BuildTree("*", 2);
 	} else if(lexer.isNextToken("/") == "/") {
-		lexer.read("*");
+		lexer.read("/");
 		At();
+		BuildTree("/", 2);
 	}
 }
 
@@ -167,6 +197,7 @@ void Parser::Af() {
 	if(lexer.isNextToken("**") == "**") {
 		lexer.read("**");
 		Af();
+		BuildTree("**", 2);
 	}
 }
 
@@ -176,6 +207,7 @@ void Parser::Ap() {
 		lexer.read("@");
 		lexer.readIdentifier();
 		R();
+		BuildTree("@", 2);
 	}
 }
 
@@ -191,6 +223,7 @@ void Parser::R() {
 		|| lexer.isNextToken("(") == "(") {
 		
 		Rn();
+		BuildTree("gamma", 2);
 	}
 }
 
@@ -203,20 +236,25 @@ void Parser::Rn() {
 		lexer.readString();
 	} else if(lexer.isNextToken("true") == "true") {
 		lexer.read("true");
+		BuildTree("true", 0);
 	} else if(lexer.isNextToken("false") == "false") {
 		lexer.read("false");
+		BuildTree("false", 0);
 	} else if(lexer.isNextToken("nil") == "nil") {
 		lexer.read("nil");
+		BuildTree("nil", 0);
 	} else if(lexer.isNextToken("dummy") == "dummy") {
 		lexer.read("dummy");
+		BuildTree("dummy", 0);
 	} else if(lexer.isNextToken("(") == "(") {
 		lexer.read("(");
 		E();
 		lexer.read(")");
 	} else if(!reachedEof) {
-		cout << "Error in Rn\n";
+		cout << "Error in Rn.\n";
 	} else {
-
+		//reached eof
+		//set eof back to false ?
 	}
 }
 
@@ -225,22 +263,32 @@ void Parser::D() {
 	if(lexer.isNextToken("within") == "within") {
 		lexer.read("within");
 		D();
+		BuildTree("within", 2);
 	}
 }
 
 void Parser::Da() {
 	Dr();
-	while(lexer.isNextToken("and") == "and") {
-		lexer.read("and");
-		Dr();
+	if(lexer.isNextToken("and") == "and") {
+		int n =1;
+		while(lexer.isNextToken("and") == "and") {
+			lexer.read("and");
+			Dr();
+			n++;
+		}
+		BuildTree("and", n);
 	}
 }
 
 void Parser::Dr() {
 	if(lexer.isNextToken("rec") == "rec") {
 		lexer.read("rec");
+		Db();
+		BuildTree("rec", 1);
+	} else {
+		Db();
 	}
-	Db();
+	
 }
 
 void Parser::Db() {
@@ -249,19 +297,27 @@ void Parser::Db() {
 		D();
 		lexer.read(")");
 	} else {
+		//look two tokens ahead. Depending on the token after the first identifier, decide where to go.
+		string nextIdentifier = lexer.isNextToken(IDENTIFIER);
 		lexer.readIdentifier();
 		if(lexer.isNextToken(IDENTIFIER) != "" || lexer.isNextToken("(") == "(") {
+			int n = 0;
 			while(lexer.isNextToken(IDENTIFIER) != "" || lexer.isNextToken("(") == "(") {
 				Vb();
+				n++;
 			}
 			lexer.read("=");
 			E();
+			BuildTree("function_form", n + 2);
 		} else {
 			if(lexer.isNextToken(",") == ",") {
+				//before calling Vl, put back the first identifier you pulled out earlier.
+				lexer.revert(nextIdentifier);
 				Vl();
 			}
 			lexer.read("=");
 			E();
+			BuildTree("=", 2);
 		}
 	}
 }
@@ -271,7 +327,8 @@ void Parser::Vb() {
 		lexer.read("(");
 		if(lexer.isNextToken(")") == (")")) {
 			lexer.read(")");
-			//TODO: build tree "()"			
+			//TODO: build tree "()"		
+			BuildTree("()", 0);
 		} else {
 			Vl();
 			lexer.read(")");
@@ -284,16 +341,17 @@ void Parser::Vb() {
 
 void Parser::Vl() {
 	lexer.readIdentifier();
-	if(lexer.isNextToken(",") == ",") {
-		while(lexer.isNextToken(",") == ",") {
-			lexer.read(",");
-			lexer.readIdentifier();
-		}
-	} else {
-		cout << "Error, expecting ','\n";
-		killYourself();
+	lexer.read(",");
+	int n = 1;
+	while(lexer.isNextToken(",") == ",") {
+		lexer.read(",");
+		lexer.readIdentifier();
+		n++;
 	}
+	BuildTree(",", n);
 }
+
+//------------------------ Helper functions -------------------//
 
 void Parser::killYourself() {
 	in.close();
@@ -306,17 +364,50 @@ void Parser::Helper(string file) {
 	out.close();
 }
 
+void Parser::BuildTree(string name, int count){
+    
+    Node* n = new Node;
+    n->name = name;
+    n->count = count;
+    n->child = new Node*[count];
+    
+    for(int i = count-1; i >= 0; i--){
+        Node* temp = s.top();
+        s.pop();
+        n->child[i] = temp;
+    }
+    s.push(n);
+}
+
+void Parser::DispTree(Node *node){
+    DispTree(node, 0);
+    cout<<endl;
+}
+void Parser::DispTree(Node *node, int level){
+    if(node == NULL)
+        return;
+    for(int i = 1; i <= level; i++)
+        cout<<". ";
+    cout<<node->name<<"("<<node->count<<")"<<endl;
+
+    if(node->child == NULL)
+        return;
+    
+    for(int i = 0; i < node->count; i++){
+        DispTree(node->child[i], level+1);
+    }
+    
+}
+
 int main(int argc, char** argv) {
 	Parser parser;
 	reachedEof = false;
-
 	string file;
 	file = argv[1];
 	parser.Helper(file);
-
     in.open(file.c_str());
 
     parser.E();
-    // lexer.isNumber();
     in.close();
+    parser.DispTree(s.top());
 }

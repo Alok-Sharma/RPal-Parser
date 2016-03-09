@@ -9,6 +9,12 @@ extern const std::string STRING;
 extern const std::string IDENTIFIER;
 extern bool reachedEof;
 
+typedef struct nodeType{
+    std::string name;
+    struct nodeType** child;
+    int count;
+} Node;
+
 class Lexer {
 public:
 //lexer util functions
@@ -36,6 +42,10 @@ class Parser {
 public:
 	void Test();
 	void Helper(string);
+	void BuildTree(string name, int count);
+	void DispTree(Node *node);
+	void DispTree(Node *node, int level);
+
 	//Parser functions
 	void E();
 	void Ew();

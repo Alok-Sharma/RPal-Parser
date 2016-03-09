@@ -25,6 +25,7 @@ const string NUMBER = "number";
 const string STRING = "string";
 
 const string IDENTIFIER = "identifier";
+Parser parser;
 
 //main function to check if the next token is the same as the supplied argument
 string Lexer::isNextToken(string input) {
@@ -61,7 +62,7 @@ void Lexer::read(string input) {
 	if(token != input) {
 		cout << "Error, expected " << input <<"\n";
 	} else {
-		cout << input << "\n";
+		// cout << input << "\n";
 	}
 }
 
@@ -70,6 +71,7 @@ void Lexer::readIdentifier() {
 	if(token != "") {
 		//found the identifier
 		read(token);
+		parser.BuildTree("<ID:" + token + ">", 0);
 	} else {
 		cout << "Error, expected IDENTIFIER\n";
 	}
@@ -80,6 +82,7 @@ void Lexer::readNumber() {
 	if(token != "") {
 		//found the number
 		read(token);
+		parser.BuildTree("<INT:" + token + ">", 0);
 	} else {
 		cout << "Error, expected NUMBER\n";
 	}
@@ -90,6 +93,7 @@ void Lexer::readString() {
 	if(token != "") {
 		//found string
 		read(token);
+		parser.BuildTree("<STR:\'" + token +"\''>", 0);
 	} else {
 		cout << "Error, expected STRING\n";
 	}
