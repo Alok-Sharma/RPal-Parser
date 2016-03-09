@@ -58,15 +58,15 @@ void Lexer::read(string input) {
 		ch =in.get();
 		token = token + ch;
 	}
-	cout << "I read: " << token << "\n";
 	if(token != input) {
 		cout << "Error, expected " << input <<"\n";
+	} else {
+		cout << input << "\n";
 	}
 }
 
 void Lexer::readIdentifier() {
 	string token = isNextToken(IDENTIFIER);
-	cout << "read identifier " << token << "\n";
 	if(token != "") {
 		//found the identifier
 		read(token);
@@ -104,9 +104,11 @@ string Lexer::isIdentifier(string input) {
 		while(isalpha(in.peek()) || isdigit(in.peek()) || in.peek() == '_'){
         	token += in.get();
     	}
-    	cout << "is identifier before reverting " << token <<"\n";
+    	// cout << "is identifier before reverting " << token <<"\n";
     	revert(token);
-    	if(input == IDENTIFIER || token == input) {
+    	if(token == input) {
+    		return token;
+    	} else if (input == IDENTIFIER && !contains(identifiers, token)) { //return any identifier, but shouldnt be a key word
     		return token;
     	} else {
     		return "";
@@ -140,7 +142,7 @@ string Lexer::isNumber() {
 
 //helper function to check if next token is an operator
 string Lexer::isOperator(string input) {
-	string result;
+	string result = "";
 	char ch;
 
 	while(contains(operators, string(1, in.peek()))) {
@@ -148,18 +150,19 @@ string Lexer::isOperator(string input) {
 		result = result + ch;
 	}
 
-	revert(result);
 	if(result == input) {
+		revert(result);
 		return result;
-	} else {
-		return "";
+	} else if(result != "") {
+		revert(result);
 	}
+	return "";
 }
 
 //helper function to check if next token is a string
 string Lexer::isString() {
 	char ch;
-	string token;
+	string token = "";
 
 	if(in.peek() == '\"') {
 		ch = in.get();
@@ -207,7 +210,7 @@ void Lexer::ignoreCommentsAndSpaces() {
 	while(isCommentBegin()) {
 		//go to end of line;
 		getline(in, line);
-		cout << "ignoring " << line << "\n";
+		// cout << "ignoring " << line << "\n";
 		ignoreSpace();
 	}
 }
@@ -227,7 +230,7 @@ bool Lexer::isCommentBegin() {
 	if(commentBegin == "//") {
 		return true;
 	} else if(commentBegin != "") {
-		cout << "before reverting in comment\n";
+		// cout << "before reverting in comment\n";
 		revert(commentBegin);
 		return false;
 	}
@@ -248,11 +251,11 @@ void Lexer::revert(string input) {
 	// cout << "reverting " << input << " length " << length << "\n";
 	if(in.fail()) {
 		in.clear();
+		reachedEof = true;
 	}
     for(int i = length - 1; i >= 0; i--){
         in.putback(input[i]);
     }
-    cout << "after puting back " << input << " peeked " << string(1,in.peek()) << "\n";
 }
 
 // Helper function - check if the given input exists within input vector

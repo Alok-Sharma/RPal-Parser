@@ -8,10 +8,64 @@
 
 using namespace std;
 ifstream in;
+ofstream out;
 Lexer lexer;
+bool reachedEof;
 
 void Parser::E() {
+	if(lexer.isNextToken("let") == "let") {
+		lexer.read("let");
+		D();
+		lexer.read("in");
+		E();
+		//buildtree
+	} else if(lexer.isNextToken("fn") == "fn") {
+		lexer.read("fn");
+		int n = 1;
+		Vb();
+		while(lexer.isNextToken(".") != ".") {
+			n++;
+			Vb();
+		}
+		lexer.read(".");
+		E();
+	} else {
+		Ew();
+	}
+}
 
+void Parser::Ew() {
+	T();
+	if(lexer.isNextToken("where") == "where") {
+		lexer.read("where");
+		Dr();
+	}
+}
+
+void Parser::T() {
+	Ta();
+	while(lexer.isNextToken(",") == ",") {
+		lexer.read(",");
+		Ta();
+	}
+}
+
+void Parser::Ta() {
+	Tc();
+	while(lexer.isNextToken("aug") == "aug") {
+		lexer.read("aug");
+		Tc();
+	}
+}
+
+void Parser::Tc() {
+	B();
+	if(lexer.isNextToken("->") == "->") {
+		lexer.read("->");
+		Tc();
+		lexer.read("|");
+		Tc();
+	}
 }
 
 void Parser::B() {
@@ -76,12 +130,25 @@ void Parser::Bp() {
 void Parser::A() {
 	if(lexer.isNextToken("+") == "+") {
 		lexer.read("+");
-
+		At();
 	} else if(lexer.isNextToken("-") == "-") {
 		lexer.read("-");
+		At();
+	} else {
+		At();
 	}
-	At();
-	//TODO not complete
+	
+	while(lexer.isNextToken("+") == "+" || lexer.isNextToken("-") == "-") {
+		if(lexer.isNextToken("+") == "+") {
+			lexer.read("+");
+			At();
+			//buildtree +
+		} else {
+			lexer.read("-");
+			At();
+			//buildtree -
+		}
+	}
 }
 
 void Parser::At() {
@@ -97,8 +164,10 @@ void Parser::At() {
 
 void Parser::Af() {
 	Ap();
-	lexer.read("**");
-	Af();
+	if(lexer.isNextToken("**") == "**") {
+		lexer.read("**");
+		Af();
+	}
 }
 
 void Parser::Ap() {
@@ -112,19 +181,26 @@ void Parser::Ap() {
 
 void Parser::R() {
 	Rn();
-	while(in.peek() == ' ') {
-		in.get();
+	while(lexer.isNextToken(IDENTIFIER) != ""
+		|| lexer.isNextToken(NUMBER) != ""
+		|| lexer.isNextToken(STRING) != "" 
+		|| lexer.isNextToken("true") == "true"
+		|| lexer.isNextToken("false") == "false"
+		|| lexer.isNextToken("nil") == "nil"
+		|| lexer.isNextToken("dummy") == "dummy"
+		|| lexer.isNextToken("(") == "(") {
+		
 		Rn();
 	}
 }
 
 void Parser::Rn() {
 	if(lexer.isNextToken(IDENTIFIER) != "") {
-		lexer.read(lexer.isNextToken(IDENTIFIER));
+		lexer.readIdentifier();
 	} else if(lexer.isNextToken(NUMBER) != "") {
-		lexer.read(lexer.isNextToken(NUMBER));
+		lexer.readNumber();
 	} else if(lexer.isNextToken(STRING) != "") {
-		lexer.read(lexer.isNextToken(STRING));
+		lexer.readString();
 	} else if(lexer.isNextToken("true") == "true") {
 		lexer.read("true");
 	} else if(lexer.isNextToken("false") == "false") {
@@ -136,20 +212,20 @@ void Parser::Rn() {
 	} else if(lexer.isNextToken("(") == "(") {
 		lexer.read("(");
 		E();
-		if(lexer.isNextToken(")") == ")") {
-			lexer.read(")");
-		} else {
-			cout << "Error, expecting ')'\n";
-		}
+		lexer.read(")");
+	} else if(!reachedEof) {
+		cout << "Error in Rn\n";
 	} else {
-		cout << "Error.";
+
 	}
 }
 
 void Parser::D() {
 	Da();
-	lexer.read("within");
-	D();
+	if(lexer.isNextToken("within") == "within") {
+		lexer.read("within");
+		D();
+	}
 }
 
 void Parser::Da() {
@@ -168,24 +244,25 @@ void Parser::Dr() {
 }
 
 void Parser::Db() {
-	if(lexer.isNextToken(IDENTIFIER) != "") {
-		//found an identifier
-		lexer.read(lexer.isNextToken(IDENTIFIER));
-		Vb();
-
-		while(lexer.isNextToken("=") != "=" || in.peek() == EOF) {
-			Vb();
-		}
-		lexer.read("=");
-		E();
-	} else if (lexer.isNextToken("(") == "(") {
-		lexer.read(lexer.isNextToken("("));
+	if(lexer.isNextToken("(") == "(") {
+		lexer.read("(");
 		D();
 		lexer.read(")");
 	} else {
-		Vl();
-		lexer.read("=");
-		E();
+		lexer.readIdentifier();
+		if(lexer.isNextToken(IDENTIFIER) != "" || lexer.isNextToken("(") == "(") {
+			while(lexer.isNextToken(IDENTIFIER) != "" || lexer.isNextToken("(") == "(") {
+				Vb();
+			}
+			lexer.read("=");
+			E();
+		} else {
+			if(lexer.isNextToken(",") == ",") {
+				Vl();
+			}
+			lexer.read("=");
+			E();
+		}
 	}
 }
 
@@ -207,36 +284,39 @@ void Parser::Vb() {
 
 void Parser::Vl() {
 	lexer.readIdentifier();
-	while(lexer.isNextToken(",") == ",") {
-		lexer.read(",");
-		lexer.readIdentifier();
+	if(lexer.isNextToken(",") == ",") {
+		while(lexer.isNextToken(",") == ",") {
+			lexer.read(",");
+			lexer.readIdentifier();
+		}
+	} else {
+		cout << "Error, expecting ','\n";
+		killYourself();
 	}
 }
 
-void Parser::Test() {
-	cout << string(1,in.peek()) << "\n";
-	in.get(); //a
-	cout << string(1,in.peek()) << "\n";
-	in.get(); //l
+void Parser::killYourself() {
+	in.close();
+	exit(0);
+}
 
-	if(in.peek() != EOF) {
-		cout << "inside\n";
-		in.get();
-	}
-	// cout << string(1,in.peek()) << "\n"; //peeked eof
-	in.putback('l');
-	// cout << string(1,in.peek()) << "\n";
-	if(in.fail()) {
-		cout << "failed\n";
-	}
+void Parser::Helper(string file) {
+	out.open(file, ios::app);
+	out << " ";
+	out.close();
 }
 
 int main(int argc, char** argv) {
+	Parser parser;
+	reachedEof = false;
+
 	string file;
 	file = argv[1];
-    in.open(file.c_str());
-    Parser parser;
+	parser.Helper(file);
 
-    parser.Vl();
+    in.open(file.c_str());
+
+    parser.E();
+    // lexer.isNumber();
     in.close();
 }

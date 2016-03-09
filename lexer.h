@@ -7,6 +7,7 @@ extern std::ifstream in;
 extern const std::string NUMBER;
 extern const std::string STRING;
 extern const std::string IDENTIFIER;
+extern bool reachedEof;
 
 class Lexer {
 public:
@@ -34,8 +35,14 @@ public:
 class Parser {
 public:
 	void Test();
+	void Helper(string);
 	//Parser functions
 	void E();
+	void Ew();
+
+	void T();
+	void Ta();
+	void Tc();
 
 	void B();
 	void Bt();
@@ -57,4 +64,6 @@ public:
 
 	void Vb();
 	void Vl();
+
+	void killYourself();
 };
