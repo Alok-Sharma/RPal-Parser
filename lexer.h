@@ -37,6 +37,14 @@ public:
 	//Parser functions
 	void E();
 
+	void B();
+	void Bt();
+	void Bs();
+	void Bp();
+
+	void A();
+	void At();
+	void Af();
 	void Ap();
 
 	void R();

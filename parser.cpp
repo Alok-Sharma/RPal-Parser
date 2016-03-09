@@ -14,17 +14,108 @@ void Parser::E() {
 
 }
 
+void Parser::B() {
+	Bt();
+	while(lexer.isNextToken("or") == "or") {
+		lexer.read("or");
+		Bt();
+	}
+}
+
+void Parser::Bt() {
+	Bs();
+	while(lexer.isNextToken("&") == "&") {
+		lexer.read("&");
+		Bs();
+	}
+}
+
+void Parser::Bs() {
+	if(lexer.isNextToken("not") == "not") {
+		lexer.read("not");
+	}
+	Bp();
+}
+
+void Parser::Bp() {
+	A();
+
+	if(lexer.isNextToken("gr") == "gr") {
+		lexer.read("gr");
+		A();
+	} else if(lexer.isNextToken(">") == ">") {
+		lexer.read(">");
+		A();
+	} else if(lexer.isNextToken("ge") == "ge") {
+		lexer.read("ge");
+		A();
+	} else if(lexer.isNextToken(">=") == ">=") {
+		lexer.read(">=");
+		A();
+	} else if(lexer.isNextToken("ls") == "ls") {
+		lexer.read("ls");
+		A();
+	} else if(lexer.isNextToken("<") == "<") {
+		lexer.read("<");
+		A();
+	} else if(lexer.isNextToken("le") == "le") {
+		lexer.read("le");
+		A();
+	} else if(lexer.isNextToken("<=") == "<=") {
+		lexer.read("<=");
+		A();
+	} else if(lexer.isNextToken("eq") == "eq") {
+		lexer.read("eq");
+		A();
+	} else if(lexer.isNextToken("ne") == "ne") {
+		lexer.read("ne");
+		A();
+	}
+}
+
+void Parser::A() {
+	if(lexer.isNextToken("+") == "+") {
+		lexer.read("+");
+
+	} else if(lexer.isNextToken("-") == "-") {
+		lexer.read("-");
+	}
+	At();
+	//TODO not complete
+}
+
+void Parser::At() {
+	Af();
+	if(lexer.isNextToken("*") == "*") {
+		lexer.read("*");
+		At();
+	} else if(lexer.isNextToken("/") == "/") {
+		lexer.read("*");
+		At();
+	}
+}
+
+void Parser::Af() {
+	Ap();
+	lexer.read("**");
+	Af();
+}
+
 void Parser::Ap() {
 	R();
 	while(lexer.isNextToken("@") == "@") {
 		lexer.read("@");
-
+		lexer.readIdentifier();
+		R();
 	}
 }
 
 void Parser::R() {
 	Rn();
-
+	while(in.peek() == ' ') {
+		in.get();
+		Rn();
+	}
 }
 
 void Parser::Rn() {
@@ -57,14 +148,8 @@ void Parser::Rn() {
 
 void Parser::D() {
 	Da();
-	if(lexer.isNextToken("within") == "within") {
-		lexer.read("within");
-		D();
-	} else if(lexer.isNextToken(";") == ";") {
-		lexer.read(";");
-	} else {
-		cout << "Error, expecting another definition, or a ';'\n";
-	}
+	lexer.read("within");
+	D();
 }
 
 void Parser::Da() {
@@ -72,11 +157,6 @@ void Parser::Da() {
 	while(lexer.isNextToken("and") == "and") {
 		lexer.read("and");
 		Dr();
-	}
-	if(lexer.isNextToken(";") == ";") {
-		lexer.read(";");
-	} else {
-		cout << "Error, expecting ';'\n";
 	}
 }
 
@@ -96,87 +176,58 @@ void Parser::Db() {
 		while(lexer.isNextToken("=") != "=" || in.peek() == EOF) {
 			Vb();
 		}
-
-		if(lexer.isNextToken("=") == "=") {
-			lexer.read("=");
-			E();
-		} else {
-			cout << "Error, expecting '='\n";
-		}
-
+		lexer.read("=");
+		E();
 	} else if (lexer.isNextToken("(") == "(") {
 		lexer.read(lexer.isNextToken("("));
 		D();
-
-		if(lexer.isNextToken(")") == ")") {
-			lexer.read(")");
-			if(lexer.isNextToken(";") == ";") {
-				lexer.read(";");
-			}
-		} else {
-			cout << "Error, expecting ')'\n";
-		}
-
+		lexer.read(")");
 	} else {
 		Vl();
-
-		if(lexer.isNextToken("=") == "=") {
-			lexer.read("=");
-			E();
-		} else {
-			cout << "Error, expecting '='\n";
-		}
+		lexer.read("=");
+		E();
 	}
 }
 
 void Parser::Vb() {
 	if(lexer.isNextToken("(") == "(") {
 		lexer.read("(");
-
 		if(lexer.isNextToken(")") == (")")) {
 			lexer.read(")");
 			//TODO: build tree "()"			
 		} else {
 			Vl();
-
-			if(lexer.isNextToken(")") == (")")) {
-				lexer.read(")");
-			} else {
-				cout << "Error, expecing )\n";
-			}
+			lexer.read(")");
 		}
 
-	} else if(lexer.isNextToken(IDENTIFIER) != "") {
-		//got identifier, read
-		lexer.read(lexer.isNextToken(IDENTIFIER));
-	} else {
-		cout << "Error.\n";
+	} else{
+		lexer.readIdentifier();
 	}
 }
 
 void Parser::Vl() {
-	// if(lexer.isNextToken(IDENTIFIER) != "") {
-	// 	lexer.read(lexer.isNextToken(IDENTIFIER));
-
-	// 	while(lexer.isNextToken(",") == ",") {
-	// 		lexer.read(",");
-	// 		if(lexer.isNextToken(IDENTIFIER) != "") {
-	// 			lexer.read(lexer.isNextToken(IDENTIFIER));
-	// 			//it was an identifier, so continue
-	// 		} else {
-	// 			cout << "Error, IDENTIFIER expected after \",\"\n";
-	// 			break;
-	// 		}
-	// 	}
-	// 	//TODO: buildTree ","
-	// } else {
-	// 	cout << "Error, IDENTIFIER expected\n";
-	// }
-
 	lexer.readIdentifier();
 	while(lexer.isNextToken(",") == ",") {
 		lexer.read(",");
 		lexer.readIdentifier();
+	}
+}
+
+void Parser::Test() {
+	cout << string(1,in.peek()) << "\n";
+	in.get(); //a
+	cout << string(1,in.peek()) << "\n";
+	in.get(); //l
+
+	if(in.peek() != EOF) {
+		cout << "inside\n";
+		in.get();
+	}
+	// cout << string(1,in.peek()) << "\n"; //peeked eof
+	in.putback('l');
+	// cout << string(1,in.peek()) << "\n";
+	if(in.fail()) {
+		cout << "failed\n";
 	}
 }
 

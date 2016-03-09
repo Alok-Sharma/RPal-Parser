@@ -147,6 +147,7 @@ string Lexer::isOperator(string input) {
 		ch = in.get();
 		result = result + ch;
 	}
+
 	revert(result);
 	if(result == input) {
 		return result;
@@ -245,6 +246,9 @@ void Lexer::ignoreSpace() {
 void Lexer::revert(string input) {
 	int length = input.length();
 	// cout << "reverting " << input << " length " << length << "\n";
+	if(in.fail()) {
+		in.clear();
+	}
     for(int i = length - 1; i >= 0; i--){
         in.putback(input[i]);
     }
