@@ -341,14 +341,15 @@ void Parser::Vb() {
 
 void Parser::Vl() {
 	lexer.readIdentifier();
-	lexer.read(",");
 	int n = 1;
-	while(lexer.isNextToken(",") == ",") {
-		lexer.read(",");
-		lexer.readIdentifier();
-		n++;
+	if(lexer.isNextToken(",") == ",") {
+		while(lexer.isNextToken(",") == ",") {
+			lexer.read(",");
+			lexer.readIdentifier();
+			n++;
+		}
+		BuildTree(",", n);
 	}
-	BuildTree(",", n);
 }
 
 //------------------------ Helper functions -------------------//
@@ -401,13 +402,23 @@ void Parser::DispTree(Node *node, int level){
 
 int main(int argc, char** argv) {
 	Parser parser;
+	bool dispTree = false;
 	reachedEof = false;
 	string file;
-	file = argv[1];
-	parser.Helper(file);
-    in.open(file.c_str());
+
+	for(int count = 1; count < argc; count++) {
+		if(string(argv[count]) == "-ast") {
+			dispTree = true;
+		} else if(string(argv[count])[0] != '-') {
+			file = string(argv[count]);
+			parser.Helper(file);
+    		in.open(file.c_str());
+		}
+	}
 
     parser.E();
+    if(dispTree) {
+    	parser.DispTree(s.top());
+    }
     in.close();
-    parser.DispTree(s.top());
-}
+} 
