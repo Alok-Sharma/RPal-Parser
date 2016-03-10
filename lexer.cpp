@@ -93,7 +93,7 @@ void Lexer::readString() {
 	if(token != "") {
 		//found string
 		read(token);
-		parser.BuildTree("<STR:\'" + token +"\''>", 0);
+		parser.BuildTree("<STR:" + token +">", 0);
 	} else {
 		cout << "Error, expected STRING\n";
 	}
@@ -168,14 +168,16 @@ string Lexer::isString() {
 	char ch;
 	string token = "";
 
-	if(in.peek() == '\"') {
+	if(in.peek() == '\"' || in.peek() == '\'') {
+		char quoteType = in.peek();
 		ch = in.get();
 		token = token + ch;
-		while(in.peek() != '\"') {
+		while(in.peek() != quoteType) {
 			ch = in.get();
 			token = token + ch;
 			if(isEscapedQuotes()) {
-				ch = in.get(); //ch here will be the second double quote(thus skipping over it), of an escaped double quote.
+				ch = in.get(); //ch here will be the second double quote(thus skipping over it), of an escaped double quote. 
+								//Rpal escapes with double of whatever you want to escape
 				token = token + ch + ch;
 			}
 			if(in.peek() == EOF) {
@@ -195,11 +197,11 @@ string Lexer::isString() {
 //helper function to skip overescaped quotes. Used in isString.
 bool Lexer::isEscapedQuotes() {
 	char ch;
-	if(in.peek() != '\"') {
+	if(in.peek() != '\"' || in.peek() != '\'') {
 		return false;
 	} else {
 		ch = in.get();
-		if(in.peek() != '\"') {
+		if(in.peek() != ch) {
 			in.putback(ch);
 			return false;
 		} else {
