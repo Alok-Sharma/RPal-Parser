@@ -236,16 +236,16 @@ void Parser::Rn() {
 		lexer.readString();
 	} else if(lexer.isNextToken("true") == "true") {
 		lexer.read("true");
-		BuildTree("true", 0);
+		BuildTree("<true>", 0);
 	} else if(lexer.isNextToken("false") == "false") {
 		lexer.read("false");
-		BuildTree("false", 0);
+		BuildTree("<false>", 0);
 	} else if(lexer.isNextToken("nil") == "nil") {
 		lexer.read("nil");
-		BuildTree("nil", 0);
+		BuildTree("<nil>", 0);
 	} else if(lexer.isNextToken("dummy") == "dummy") {
 		lexer.read("dummy");
-		BuildTree("dummy", 0);
+		BuildTree("<dummy>", 0);
 	} else if(lexer.isNextToken("(") == "(") {
 		lexer.read("(");
 		E();
