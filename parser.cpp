@@ -210,7 +210,7 @@ void Parser::Ap() {
 		lexer.read("@");
 		lexer.readIdentifier();
 		R();
-		BuildTree("@", 2);
+		BuildTree("@", 3);
 	}
 }
 
