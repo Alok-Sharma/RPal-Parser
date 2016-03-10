@@ -382,14 +382,14 @@ void Parser::BuildTree(string name, int count){
 
 void Parser::DispTree(Node *node){
     DispTree(node, 0);
-    cout<<endl;
 }
+
 void Parser::DispTree(Node *node, int level){
     if(node == NULL)
         return;
     for(int i = 1; i <= level; i++)
         cout<<".";
-    cout<<node->name<<endl;
+    cout<<node->name<<" "<<endl;
 
     if(node->child == NULL)
         return;
