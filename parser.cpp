@@ -414,7 +414,7 @@ int main(int argc, char** argv) {
 			dispTree = true;
 		} else if(string(argv[count])[0] != '-') {
 			file = string(argv[count]);
-			parser.Helper(file);
+			// parser.Helper(file);
     		in.open(file.c_str());
 		}
 	}

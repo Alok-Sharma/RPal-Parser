@@ -258,6 +258,7 @@ void Lexer::revert(string input) {
 	if(in.fail()) {
 		in.clear();
 		reachedEof = true;
+		// cout << "failed, fixed";
 	}
     for(int i = length - 1; i >= 0; i--){
         in.putback(input[i]);
