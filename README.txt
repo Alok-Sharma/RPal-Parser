@@ -1,6 +1,4 @@
-# RPal-Parser
-
-README for PROJECT 1 -  RPal Parser
+** README for PROJECT 1 -  RPal Parser
 
 NAME: ALOK SHARMA
 UFID: 40838147

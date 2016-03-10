@@ -40,10 +40,9 @@ public:
 
 class Parser {
 public:
+	// Helper functions
 	void Test();
-	void Helper(string);
-	void BuildTree(string name, int count);
-	void DispTree(Node *node);
+	void BuildTree(string name, int popCount);
 	void DispTree(Node *node, int level);
 
 	//Parser functions
@@ -74,6 +73,4 @@ public:
 
 	void Vb();
 	void Vl();
-
-	void killYourself();
 };

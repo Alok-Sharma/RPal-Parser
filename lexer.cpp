@@ -27,7 +27,7 @@ const string STRING = "string";
 const string IDENTIFIER = "identifier";
 Parser parser;
 
-//main function to check if the next token is the same as the supplied argument
+// Main function to check if the next token is the same as the supplied argument
 string Lexer::isNextToken(string input) {
 	ignoreCommentsAndSpaces();
 
@@ -50,6 +50,7 @@ string Lexer::isNextToken(string input) {
 	return "";
 }
 
+// Main function to read the input string
 void Lexer::read(string input) {
 	ignoreCommentsAndSpaces();
 
@@ -66,6 +67,8 @@ void Lexer::read(string input) {
 	}
 }
 
+// Function to read the next IDENTIFIER. This expression expects the next token to be an identifier
+// If it isnt, then an error will be thrown.
 void Lexer::readIdentifier() {
 	string token = isNextToken(IDENTIFIER);
 	if(token != "") {
@@ -77,6 +80,8 @@ void Lexer::readIdentifier() {
 	}
 }
 
+// Function to read the next NUMBER. This expression expects the next token to be a NUMBER
+// If it isnt, then an error will be thrown.
 void Lexer::readNumber() {
 	string token = isNextToken(NUMBER);
 	if(token != "") {
@@ -88,6 +93,8 @@ void Lexer::readNumber() {
 	}
 }
 
+// Function to read the next STRING. This expression expects the next token to be an STRING
+// If it isnt, then an error will be thrown.
 void Lexer::readString() {
 	string token = isNextToken(STRING);
 	if(token != "") {
@@ -99,7 +106,7 @@ void Lexer::readString() {
 	}
 }
 
-//helper function to check if next token is an identifier
+// Function to check if next token is an identifier
 string Lexer::isIdentifier(string input) {
 	char ch;
 	string token;
@@ -210,6 +217,8 @@ bool Lexer::isEscapedQuotes() {
 	}
 }
 
+// main function to ignore any space and comments starting from the current position
+// in the file, till we encounter anything apart from a comment/space.
 void Lexer::ignoreCommentsAndSpaces() {
 	string line;
 	ignoreSpace();
@@ -221,6 +230,7 @@ void Lexer::ignoreCommentsAndSpaces() {
 	}
 }
 
+// checks if we are currently at the beginning of a comment.
 bool Lexer::isCommentBegin() {
 	string commentBegin = "";
 
@@ -243,6 +253,7 @@ bool Lexer::isCommentBegin() {
 	return false;
 }
 
+// ignores spaces starting from cureent position, till we encounter anything apart from a space.
 void Lexer::ignoreSpace() {
 	//removes spaces
 	while(isspace(in.peek())) {

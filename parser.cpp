@@ -14,6 +14,7 @@ Lexer lexer;
 bool reachedEof;
 stack<Node*> s;
 
+//------------------ Expressions non-terminals ---------------------//
 void Parser::E() {
 	if(lexer.isNextToken("let") == "let") {
 		lexer.read("let");
@@ -46,6 +47,7 @@ void Parser::Ew() {
 	}
 }
 
+//--------------------- Tuple expressions non-terminals ---------------//
 void Parser::T() {
 	Ta();
 
@@ -80,6 +82,7 @@ void Parser::Tc() {
 	}
 }
 
+//----------------- Boolean expressions non-terminals -------------//
 void Parser::B() {
 	Bt();
 	while(lexer.isNextToken("or") == "or") {
@@ -154,6 +157,7 @@ void Parser::Bp() {
 	}
 }
 
+//---------------- Arithmetic expressions non-terminals --------------//
 void Parser::A() {
 	if(lexer.isNextToken("+") == "+") {
 		lexer.read("+");
@@ -214,6 +218,8 @@ void Parser::Ap() {
 	}
 }
 
+
+//------------------- Rators and Rands non terminals ---------------//
 void Parser::R() {
 	Rn();
 	while(lexer.isNextToken(IDENTIFIER) != ""
@@ -260,6 +266,8 @@ void Parser::Rn() {
 		//set eof back to false ?
 	}
 }
+
+//--------------- Definitions non terminals--------------//
 
 void Parser::D() {
 	Da();
@@ -325,6 +333,8 @@ void Parser::Db() {
 	}
 }
 
+//-------------- Variable non terminals ------------//
+
 void Parser::Vb() {
 	if(lexer.isNextToken("(") == "(") {
 		lexer.read("(");
@@ -357,25 +367,21 @@ void Parser::Vl() {
 
 //------------------------ Helper functions -------------------//
 
-void Parser::killYourself() {
-	in.close();
-	exit(0);
-}
+// void Parser::Helper(string file) {
+// 	out.open(file.c_str(), ios::app);
+// 	out << " ";
+// 	out.close();
+// }
 
-void Parser::Helper(string file) {
-	out.open(file.c_str(), ios::app);
-	out << " ";
-	out.close();
-}
-
-void Parser::BuildTree(string name, int count){
+//Build tree for the input nodename, and pops the popcount number of trees from the stack, making them its children
+void Parser::BuildTree(string nodeName, int popCount){
     
     Node* n = new Node;
-    n->name = name;
-    n->count = count;
-    n->child = new Node*[count];
+    n->name = nodeName;
+    n->count = popCount;
+    n->child = new Node*[popCount];
     
-    for(int i = count-1; i >= 0; i--){
+    for(int i = popCount-1; i >= 0; i--){
         Node* temp = s.top();
         s.pop();
         n->child[i] = temp;
@@ -383,10 +389,7 @@ void Parser::BuildTree(string name, int count){
     s.push(n);
 }
 
-void Parser::DispTree(Node *node){
-    DispTree(node, 0);
-}
-
+//function to print the tree according to the specified formatting.
 void Parser::DispTree(Node *node, int level){
     if(node == NULL)
         return;
@@ -400,7 +403,6 @@ void Parser::DispTree(Node *node, int level){
     for(int i = 0; i < node->count; i++){
         DispTree(node->child[i], level+1);
     }
-    
 }
 
 int main(int argc, char** argv) {
@@ -421,7 +423,7 @@ int main(int argc, char** argv) {
 
     parser.E();
     if(dispTree) {
-    	parser.DispTree(s.top());
+    	parser.DispTree(s.top(), 0);
     }
     in.close();
 }                                                                                                                                                                   
