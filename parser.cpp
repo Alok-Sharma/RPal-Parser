@@ -181,14 +181,17 @@ void Parser::A() {
 
 void Parser::At() {
 	Af();
-	if(lexer.isNextToken("*") == "*") {
-		lexer.read("*");
-		At();
-		BuildTree("*", 2);
-	} else if(lexer.isNextToken("/") == "/") {
-		lexer.read("/");
-		At();
-		BuildTree("/", 2);
+
+	while(lexer.isNextToken("*") == "*" || lexer.isNextToken("/") == "/") {
+		if(lexer.isNextToken("*") == "*") {
+			lexer.read("*");
+			Af();
+			BuildTree("*", 2);
+		} else if(lexer.isNextToken("/") == "/") {
+			lexer.read("/");
+			Af();
+			BuildTree("/", 2);
+		}
 	}
 }
 

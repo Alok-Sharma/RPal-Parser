@@ -1,6 +1,1 @@
-let Conc x y = Conc x y in
-let S = 'C""IS' and T = "104B"
-and Mark = Conc "CIS"
-in
-Print (Conc S T, S @Conc T, Mark T)
-         
+((M+1)/2*2)    
