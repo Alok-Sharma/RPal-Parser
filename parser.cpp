@@ -360,7 +360,7 @@ void Parser::killYourself() {
 }
 
 void Parser::Helper(string file) {
-	out.open(file, ios::app);
+	out.open(file.c_str(), ios::app);
 	out << " ";
 	out.close();
 }
@@ -421,4 +421,4 @@ int main(int argc, char** argv) {
     	parser.DispTree(s.top());
     }
     in.close();
-} 
+}                                                                                                                                                                   
