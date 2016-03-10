@@ -118,7 +118,7 @@ void Parser::Bp() {
 	} else if(lexer.isNextToken(">") == ">") {
 		lexer.read(">");
 		A();
-		BuildTree("gr", 2);
+		BuildTree(">", 2);
 	} else if(lexer.isNextToken("ge") == "ge") {
 		lexer.read("ge");
 		A();
@@ -126,7 +126,7 @@ void Parser::Bp() {
 	} else if(lexer.isNextToken(">=") == ">=") {
 		lexer.read(">=");
 		A();
-		BuildTree("ge", 2);
+		BuildTree(">=", 2);
 	} else if(lexer.isNextToken("ls") == "ls") {
 		lexer.read("ls");
 		A();
@@ -134,7 +134,7 @@ void Parser::Bp() {
 	} else if(lexer.isNextToken("<") == "<") {
 		lexer.read("<");
 		A();
-		BuildTree("ls", 2);
+		BuildTree("<", 2);
 	} else if(lexer.isNextToken("le") == "le") {
 		lexer.read("le");
 		A();
@@ -142,7 +142,7 @@ void Parser::Bp() {
 	} else if(lexer.isNextToken("<=") == "<=") {
 		lexer.read("<=");
 		A();
-		BuildTree("le", 2);
+		BuildTree("<=", 2);
 	} else if(lexer.isNextToken("eq") == "eq") {
 		lexer.read("eq");
 		A();
@@ -273,8 +273,8 @@ void Parser::Da() {
 		int n =1;
 		while(lexer.isNextToken("and") == "and") {
 			lexer.read("and");
-			Dr();
 			n++;
+			Dr();
 		}
 		BuildTree("and", n);
 	}

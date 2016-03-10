@@ -62,7 +62,7 @@ void Lexer::read(string input) {
 	if(token != input) {
 		cout << "Error, expected " << input <<"\n";
 	} else {
-		// cout << input << "\n";
+		cout << input << "\n";
 	}
 }
 
