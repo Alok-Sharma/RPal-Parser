@@ -388,8 +388,8 @@ void Parser::DispTree(Node *node, int level){
     if(node == NULL)
         return;
     for(int i = 1; i <= level; i++)
-        cout<<". ";
-    cout<<node->name<<"("<<node->count<<")"<<endl;
+        cout<<".";
+    cout<<node->name<<endl;
 
     if(node->child == NULL)
         return;
