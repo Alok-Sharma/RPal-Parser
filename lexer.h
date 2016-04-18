@@ -1,76 +1,44 @@
 //lexer.h
+#ifndef LEXER_H
+#define LEXER_H
 #include <vector>
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 //globals
-extern std::ifstream in;
-extern const std::string NUMBER;
-extern const std::string STRING;
-extern const std::string IDENTIFIER;
+extern ifstream in;
+extern const string NUMBER;
+extern const string STRING;
+extern const string IDENTIFIER;
 extern bool reachedEof;
 
+// Node struct for the non-standardized AST
 typedef struct nodeType{
-    std::string name;
-    struct nodeType** child;
-    int count;
+	string name;
+	struct nodeType** child;
+	int count;
 } Node;
 
-class Lexer {
-public:
+
 //lexer util functions
-	void revert(std::string);
-	bool contains(std::vector<std::string>, std::string);
-	void ignoreSpace();
-	void ignoreCommentsAndSpaces();
-	bool isEscapedQuotes();
-	void read(std::string);
-	void readIdentifier();
-	void readNumber();
-	void readString();
-	bool isCommentBegin();
+void revert(string);
+bool contains(vector<string>, string);
+void ignoreSpace();
+void ignoreCommentsAndSpaces();
+bool isEscapedQuotes();
+void read(string);
+void readIdentifier();
+void readNumber();
+void readString();
+bool isCommentBegin();
 
 //lexer : check next token functions.
-	string isNextToken(std::string);
-	string isIdentifier(std::string);
-	string isPunctuation(std::string);
-	string isNumber();
-	string isOperator(std::string);
-	string isString();
-};
+string isNextToken(string);
+string isIdentifier(string);
+string isPunctuation(string);
+string isNumber();
+string isOperator(string);
+string isString();
 
-class Parser {
-public:
-	// Helper functions
-	void Test();
-	void BuildTree(string name, int popCount);
-	void DispTree(Node *node, int level);
-
-	//Parser functions
-	void E();
-	void Ew();
-
-	void T();
-	void Ta();
-	void Tc();
-
-	void B();
-	void Bt();
-	void Bs();
-	void Bp();
-
-	void A();
-	void At();
-	void Af();
-	void Ap();
-
-	void R();
-	void Rn();
-
-	void D();
-	void Da();
-	void Dr();
-	void Db();
-
-	void Vb();
-	void Vl();
-};
+#endif

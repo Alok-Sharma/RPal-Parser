@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "parser.h"
 #include "lexer.h"
 #include <algorithm>
 
@@ -25,25 +26,21 @@ const string NUMBER = "number";
 const string STRING = "string";
 
 const string IDENTIFIER = "identifier";
-Parser parser;
 
 // Main function to check if the next token is the same as the supplied argument
-string Lexer::isNextToken(string input) {
+string isNextToken(string input) {
 	ignoreCommentsAndSpaces();
 
 	if(contains(identifiers, input)) {
 		return isIdentifier(input);
-		// TODO: buildtree
 	} else if(contains(punctuations, input)) {
 		return isPunctuation(input);
 	} else if(input == NUMBER) {
 		return isNumber();
-		//TODO: buildtree
 	} else if(contains(operators, string(1,input[0]))) {
 		return isOperator(input);
 	} else if(input == STRING) {
 		return isString();
-		//TODO: buildtree
 	} else if(input == IDENTIFIER) {
 		return isIdentifier(IDENTIFIER);
 	}
@@ -51,7 +48,7 @@ string Lexer::isNextToken(string input) {
 }
 
 // Main function to read the input string
-void Lexer::read(string input) {
+void read(string input) {
 	ignoreCommentsAndSpaces();
 
 	char ch;
@@ -69,12 +66,12 @@ void Lexer::read(string input) {
 
 // Function to read the next IDENTIFIER. This expression expects the next token to be an identifier
 // If it isnt, then an error will be thrown.
-void Lexer::readIdentifier() {
+void readIdentifier() {
 	string token = isNextToken(IDENTIFIER);
 	if(token != "") {
 		//found the identifier
 		read(token);
-		parser.BuildTree("<ID:" + token + ">", 0);
+		BuildTree("<ID:" + token + ">", 0);
 	} else {
 		cout << "Error, expected IDENTIFIER\n";
 	}
@@ -82,12 +79,12 @@ void Lexer::readIdentifier() {
 
 // Function to read the next NUMBER. This expression expects the next token to be a NUMBER
 // If it isnt, then an error will be thrown.
-void Lexer::readNumber() {
+void readNumber() {
 	string token = isNextToken(NUMBER);
 	if(token != "") {
 		//found the number
 		read(token);
-		parser.BuildTree("<INT:" + token + ">", 0);
+		BuildTree("<INT:" + token + ">", 0);
 	} else {
 		cout << "Error, expected NUMBER\n";
 	}
@@ -95,20 +92,19 @@ void Lexer::readNumber() {
 
 // Function to read the next STRING. This expression expects the next token to be an STRING
 // If it isnt, then an error will be thrown.
-void Lexer::readString() {
+void readString() {
 	string token = isNextToken(STRING);
 	if(token != "") {
 		//found string
 		read(token);
-		parser.BuildTree("<STR:" + token +">", 0);
+		BuildTree("<STR:" + token +">", 0);
 	} else {
 		cout << "Error, expected STRING\n";
 	}
 }
 
 // Function to check if next token is an identifier
-string Lexer::isIdentifier(string input) {
-	char ch;
+string isIdentifier(string input) {
 	string token;
 
 	if(isalpha(in.peek())) {
@@ -129,7 +125,7 @@ string Lexer::isIdentifier(string input) {
 }
 
 //helper function to check if next token is a punctuation
-string Lexer::isPunctuation(string input) {
+string isPunctuation(string input) {
 	char ch = in.peek();
 	if(ch == input[0]){
 		return input;
@@ -139,7 +135,7 @@ string Lexer::isPunctuation(string input) {
 }
 
 //helper function to check if next token is a number
-string Lexer::isNumber() {
+string isNumber() {
 	char ch;
 	string token = "";
 
@@ -152,7 +148,7 @@ string Lexer::isNumber() {
 }
 
 //helper function to check if next token is an operator
-string Lexer::isOperator(string input) {
+string isOperator(string input) {
 	string result = "";
 	char ch;
 
@@ -171,7 +167,7 @@ string Lexer::isOperator(string input) {
 }
 
 //helper function to check if next token is a string
-string Lexer::isString() {
+string isString() {
 	char ch;
 	string token = "";
 
@@ -202,7 +198,7 @@ string Lexer::isString() {
 }
 
 //helper function to skip overescaped quotes. Used in isString.
-bool Lexer::isEscapedQuotes() {
+bool isEscapedQuotes() {
 	char ch;
 	if(in.peek() != '\"' || in.peek() != '\'') {
 		return false;
@@ -219,7 +215,7 @@ bool Lexer::isEscapedQuotes() {
 
 // main function to ignore any space and comments starting from the current position
 // in the file, till we encounter anything apart from a comment/space.
-void Lexer::ignoreCommentsAndSpaces() {
+void ignoreCommentsAndSpaces() {
 	string line;
 	ignoreSpace();
 	while(isCommentBegin()) {
@@ -231,7 +227,7 @@ void Lexer::ignoreCommentsAndSpaces() {
 }
 
 // checks if we are currently at the beginning of a comment.
-bool Lexer::isCommentBegin() {
+bool isCommentBegin() {
 	string commentBegin = "";
 
 	if(in.peek() !=  EOF) {
@@ -254,7 +250,7 @@ bool Lexer::isCommentBegin() {
 }
 
 // ignores spaces starting from cureent position, till we encounter anything apart from a space.
-void Lexer::ignoreSpace() {
+void ignoreSpace() {
 	//removes spaces
 	while(isspace(in.peek())) {
 		in.get();
@@ -263,7 +259,7 @@ void Lexer::ignoreSpace() {
 
 // Helper function - If the string read from input does not match what we're looking for, then this helper function
 // can be used to take reset the input file stream head pointer.
-void Lexer::revert(string input) {
+void revert(string input) {
 	int length = input.length();
 	// cout << "reverting " << input << " length " << length << "\n";
 	if(in.fail()) {
@@ -277,7 +273,7 @@ void Lexer::revert(string input) {
 }
 
 // Helper function - check if the given input exists within input vector
-bool Lexer::contains(vector<string> vec, string input) {
+bool contains(vector<string> vec, string input) {
 	if(find(vec.begin(), vec.end(), input) != vec.end()) {
 		return true;
 	} else {
