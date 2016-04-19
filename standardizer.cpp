@@ -7,17 +7,28 @@ using namespace std;
 
 Node* Standardize(Node *node) {
 	Node* result;
-	if(node->name == "let") {
+	string name = node->name;
+
+	if(name == "let") {
 		result = StandardizeLet(node);
-	} else if(node->name == "where") {
+	} else if(name == "where") {
 		result = StandardizeWhere(node);
-	} else if(node->name == "within") {
+	} else if(name == "within") {
 		result = StandardizeWithin(node);
-	} else if(node->name == "function_form") {
+	} else if(name == "function_form") {
 		result = StandardizeFunction(node);
-	} else if(node->name == "and") {
+	} else if(name == "and") {
 		result = StandardizeAnd(node);
-	}else {
+	} else if(name == "@") {
+		result = StandardizeAt(node);
+	} else if(node->count >0) { 
+		// if node is none of the above, yet has children
+		// then just standardize the children and return node.
+		for(int i = 0; i < node->count; i++) {
+			node->child[i] == Standardize(node->child[i]);
+		}
+		result = node;
+	} else {
 		result = node;
 	}
 	return result;
@@ -92,7 +103,7 @@ Node* StandardizeFunction(Node *node) {
 	lambda->child[1] = E;
 
 	for(int i = lambdaCount; i >= 1; i--) {
-		lambda->child[0] = Standardize(node->child[lambdaCount]);
+		lambda->child[0] = Standardize(node->child[i]);
 		temp = NewNode("lambda", 2);
 		temp->child[1] = lambda;
 		lambda = temp;
@@ -136,6 +147,28 @@ Node* StandardizeAnd(Node *node) {
 	return node;
 }
 
+Node* StandardizeAt(Node *node) {
+	node->child[0] = Standardize(node->child[0]);
+	node->child[1] = Standardize(node->child[1]);
+	node->child[2] = Standardize(node->child[2]);
+
+	Node* E1 = node->child[0];
+	Node* N = node->child[1];
+	Node* E2 = node->child[2];
+	Node* gamma = NewNode("gamma", 2);
+
+	gamma->child[0] = N;
+	gamma->child[1] = E1;
+	node->name = "gamma";
+	node->count = 2;
+	node->child = new Node*[node->count];
+	node->child[0] = gamma;
+	node->child[1] = E2;
+
+	return node;
+}
+
+//Create a new node with the input name, and a child array with size as input childCount.
 Node* NewNode(string name, int childCount) {
 	Node* node = new Node;
 	node->name = name;

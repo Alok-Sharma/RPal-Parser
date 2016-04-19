@@ -401,13 +401,16 @@ void DispTree(Node *node, int level){
 }
 
 int main(int argc, char** argv) {
-	bool dispTree = false;
+	bool dispAST = false;
+	bool dispST = false;
 	reachedEof = false;
 	string file;
 
 	for(int count = 1; count < argc; count++) {
 		if(string(argv[count]) == "-ast") {
-			dispTree = true;
+			dispAST = true;
+		} else if(string(argv[count]) == "-st") {
+			dispST = true;
 		} else if(string(argv[count])[0] != '-') {
 			file = string(argv[count]);
 			// parser.Helper(file);
@@ -417,13 +420,13 @@ int main(int argc, char** argv) {
 
 	//Parse, Build, and display the AST
     E();
-    // if(dispTree) {
-    // 	DispTree(nodeStack.top(), 0);
-    // }
+    if(dispAST) {
+    	DispTree(nodeStack.top(), 0);
+    }
 
-    //Standardize and display AST
+    //Standardize and display ST
     Standardize(nodeStack.top());
-    if(dispTree) {
+    if(dispST) {
     	DispTree(nodeStack.top(), 0);
     }
 

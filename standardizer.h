@@ -10,6 +10,7 @@ Node* StandardizeWhere(Node*);
 Node* StandardizeWithin(Node*);
 Node* StandardizeFunction(Node*);
 Node* StandardizeAnd(Node*);
+Node* StandardizeAt(Node*);
 Node* NewNode(string, int);
 
 #endif
