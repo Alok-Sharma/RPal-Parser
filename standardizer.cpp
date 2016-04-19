@@ -21,6 +21,8 @@ Node* Standardize(Node *node) {
 		result = StandardizeAnd(node);
 	} else if(name == "@") {
 		result = StandardizeAt(node);
+	} else if(name == "rec") {
+		result = StandardizeRec(node);
 	} else if(node->count >0) { 
 		// if node is none of the above, yet has children
 		// then just standardize the children and return node.
@@ -164,6 +166,28 @@ Node* StandardizeAt(Node *node) {
 	node->child = new Node*[node->count];
 	node->child[0] = gamma;
 	node->child[1] = E2;
+
+	return node;
+}
+
+Node* StandardizeRec(Node *node) {
+	node->child[0] = Standardize(node->child[0]);
+	Node* X = node->child[0]->child[0];
+	Node* E = node->child[0]->child[1];
+
+	Node* lambda = NewNode("lambda", 2);
+	Node* gamma = NewNode("gamma", 2);
+	Node* YStar = NewNode("<Y*>", 0);
+
+	lambda->child[0] = X;
+	lambda->child[1] = E;
+	gamma->child[0] = YStar;
+	gamma->child[1] = lambda;
+	node->name = "=";
+	node->count = 2;
+	node->child = new Node*[node->count];
+	node->child[0] = X;
+	node->child[1] = gamma;
 
 	return node;
 }
