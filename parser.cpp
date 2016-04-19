@@ -418,7 +418,7 @@ int main(int argc, char** argv) {
 	//Parse, Build, and display the AST
     E();
     // if(dispTree) {
-    // 	parser.DispTree(s.top(), 0);
+    // 	DispTree(nodeStack.top(), 0);
     // }
 
     //Standardize and display AST

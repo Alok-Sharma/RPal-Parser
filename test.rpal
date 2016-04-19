@@ -1,1 +1,1 @@
-(x + y where x = 3) where y =4
+let x = 3 and y = 2 and z = 4 in x + y + z
