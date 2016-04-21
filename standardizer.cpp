@@ -27,7 +27,7 @@ Node* Standardize(Node *node) {
 		// if node is none of the above, yet has children
 		// then just standardize the children and return node.
 		for(int i = 0; i < node->count; i++) {
-			node->child[i] == Standardize(node->child[i]);
+			node->child[i] = Standardize(node->child[i]);
 		}
 		result = node;
 	} else {
@@ -123,7 +123,7 @@ Node* StandardizeFunction(Node *node) {
 Node* StandardizeAnd(Node *node) {
 	//standardize all immediate children
 	for(int i = 0; i < node->count; i++) {
-		node->child[i] == Standardize(node->child[i]);
+		node->child[i] = Standardize(node->child[i]);
 	}
 
 	node->name = "=";

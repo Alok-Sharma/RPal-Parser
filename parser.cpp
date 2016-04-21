@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "standardizer.h"
+#include "cse_machine.h"
 #include <vector>
 #include <algorithm>
 #include <stack>
@@ -429,6 +430,8 @@ int main(int argc, char** argv) {
     if(dispST) {
     	DispTree(nodeStack.top(), 0);
     }
+
+    evaluate(nodeStack.top());
 
     in.close();
 }                                                                                                                                                                   
