@@ -17,7 +17,7 @@ const string punctArr[] = {"(", ")", ";", ","};
 vector<string> punctuations (punctArr, punctArr + sizeof(punctArr) / sizeof(punctArr[0]));
 
 //TODO: %
-const string opArr[] = {"+", "-", "*", "<", ">", "&", ".", "@", "/", ":", "=", "~", "|", "$", "!", "#", "^", "_", "?"};
+const string opArr[] = {"+", "-", "*", "<", ">", "&", ".", "@", "/", ":", "=", "|"};
 vector<string> operators (opArr, opArr + sizeof(opArr) / sizeof(opArr[0]));
 
 //constant used for checking if we want to check the next token is a number

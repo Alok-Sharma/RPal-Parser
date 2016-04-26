@@ -7,6 +7,8 @@
 #include <iostream>
 #include <map>
 #include <stack>
+#include <cstdlib>
+#include <string>
 
 using namespace std;
 
@@ -33,9 +35,10 @@ namespace patch
 
 
 static int environCount = 0;
+static stack<int> environStack;
 
+//cse_machine functions
 void evaluate(Node*);
-void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string,string>*[], queue<cseNode*>*[]);
 void generateControlStructures(Node*, queue<cseNode*>*[]);
 void controlStructureHelper (Node*, queue<cseNode*>&, int&, Node*[]);
 void preorder(queue<Node*>&, Node*);
@@ -43,6 +46,14 @@ int countLambda(Node*);
 cseNode* createCseNode(string, string);
 cseNode* createNextEnvironment(map<string, string>*[]);
 void loadDelta(stack<cseNode*>&, int, queue<cseNode*>*[]);
-void printControlStack(stack<cseNode*>);
+void printStack(stack<cseNode*>);
+void printMap(map<string,string>*);
+
+//cse_helper functions
+void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string,string>*[], queue<cseNode*>*[]);
+bool isInt(string);
+bool isId(string);
+cseNode* executeBinaryOps(string, string, string);
+int extractInt(string);
 
 #endif

@@ -1,10 +1,5 @@
 //cse machine
 #include "cse_machine.h"
-#include <iostream>
-#include <queue>
-#include <stack>
-#include <map>
-#include <string>
 
 using namespace std;
 
@@ -19,19 +14,23 @@ void evaluate(Node* root) {
 	stack<cseNode*> programStack; // The program stack	
 	stack<cseNode*> controlStack; // The control stack
 
-	//initilize the control stack;
-	controlStack.push(createNextEnvironment(environs)); //push e0;
-	loadDelta(controlStack, 0, deltas); //push d0;
+	//initilize the environment, control stack, and program stack;
+	cseNode* n = createNextEnvironment(environs); //create e0;
+	controlStack.push(n); //push e0 to control;
+	loadDelta(controlStack, 0, deltas); //push d0 to control;
+	programStack.push(n); // push e0 to program;
 
-	startCseMachine(controlStack, programStack, environs, deltas);
+	// startCseMachine(controlStack, programStack, environs, deltas);
 
-	printControlStack(controlStack);
-}
+	printStack(programStack);
 
-void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string,string>* environs[], queue<cseNode*>* deltas[]) {
-	while(!controlStack.empty()) {
 
-	}
+	//------testing------//
+	// cseNode* n1 = createNextEnvironment(environs);
+	// (*environs[0])["Nikita"] = "pudgu";
+	// (*environs[0])["Alok"] = "baby";
+	// cseNode* n2 = createNextEnvironment(environs);
+	// printMap(environs[1]);
 }
 
 void generateControlStructures(Node* node, queue<cseNode*>* deltas[]) {
@@ -44,23 +43,12 @@ void generateControlStructures(Node* node, queue<cseNode*>* deltas[]) {
 		deltas[i] = new queue<cseNode*>;
 		controlStructureHelper(roots[i], *deltas[i], count, roots);	
 	}
-
-	// for(int j = 0; j < numOfLambda + 1; j++) {
-	// 	queue<cseNode*> q = *deltas[j];
-	// 	cout << "D" << j << ":\n";
-	// 	while(!q.empty()) {
-	// 		cout << q.front()->name << "\n";
-	// 		q.pop();
-	// 	}
-	// 	cout << "\n";
-	// }
 }
 
 void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* roots[]) {
 	cseNode* csenode = new cseNode;
 
 	if(node->name == "lambda") {
-		csenode->type = "lambda";
 		csenode->name = "lambda";
 		csenode->i = ++count;
 		csenode->x = node->child[0]->name;
@@ -105,9 +93,20 @@ cseNode* createCseNode(string type, string name) {
 	return node;
 }
 
+// creates a new environment, and pushes it to the array of environ maps. Also returns a corresponding csenode for that environment.
 cseNode* createNextEnvironment(map<string, string> *environs[]) {
 	cseNode* envNode = createCseNode("e", "e" + patch::to_string(environCount));
 	environs[environCount] = new map<string,string>();
+	if(!environStack.empty()) {
+		//pop the top environment, and copy everything in its map into newly created map.
+		int parentIndex = environStack.top();
+		map<string,string> parentEnv = *environs[parentIndex];
+		map<string,string> *currentEnv = environs[environCount];
+		(*currentEnv).insert(parentEnv.begin(), parentEnv.end()); //hopefully a copy? Copy data from parent environment.
+		// cout << "cur env size: " << currentEnv.size() << "\n";
+	}
+	environStack.push(environCount);
+	cout << "env stack top:" << environStack.top() <<"\n";
 	environCount = environCount + 1;
 	return envNode;
 }
@@ -123,14 +122,21 @@ void loadDelta(stack<cseNode*> &controlStack, int deltaNumber, queue<cseNode*>* 
 }
 
 //printing a copy of the control stack, not the actual one. So dont worry if stuff is popped.
-void printControlStack(stack<cseNode*> controlStack) {
+void printStack(stack<cseNode*> instack) {
 	cseNode* node;
-	cout << "\ncontrol stack:" << "\n"; 
-	while(!controlStack.empty()) {
-		node = controlStack.top();
+	cout << "\nstack:" << "\n"; 
+	while(!instack.empty()) {
+		node = instack.top();
 		cout << node->name << " ";
-		controlStack.pop();
+		instack.pop();
 	}
 	cout << "\n";
 }
 
+void printMap(map<string,string> *inmap) {
+	typedef map<string,string>::iterator iter;
+	cout << (*inmap).size() << "\n";
+	for(iter iterator = (*inmap).begin(); iterator != (*inmap).end(); ++iterator) {
+		cout << "hi\n";
+	}
+}
