@@ -19,7 +19,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		string nodename = csenode->name;
 		string nodetype = csenode->type;
 
-		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>") {
+		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>" || nodetype == "function") {
 			programStack.push(csenode);
 			controlStack.pop();
 
@@ -122,6 +122,12 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); //pop the e from prog stack
 			programStack.push(popVal); //push back the top val
 
+		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Print>") {
+			controlStack.pop();
+			programStack.pop();
+			string str = programStack.top()->name;
+			// programStack.pop(); // to pop or not to pop?
+			cout<< str << "\n";
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			// controlStack.pop();
 		}
