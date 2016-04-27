@@ -22,10 +22,10 @@ void evaluate(Node* root) {
 	loadDelta(controlStack, 0, deltas); //push d0 to control;
 	programStack.push(n); // push e0 to program;
 
+	printDeltas(numOfDelta, deltas);
 	startCseMachine(controlStack, programStack, environs, deltas);
 
 	// printStack(programStack);
-
 
 	//------testing------//
 	// cseNode* n1 = createNextEnvironment(environs);
@@ -77,6 +77,20 @@ void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* r
 
 		controlStructureHelper(node->child[0], q, count, roots);
 
+	} else if(node->name == "tau") {
+		csenode->name = "tau";
+		csenode->i = node->count;
+
+		q.push(csenode);
+		for(int i = 0; i < node->count; i++) {
+			roots[++count] = node->child[i];
+			cseNode* delta = new cseNode;
+			delta->name = "delta";
+			delta->type = "tau_delta";
+			delta->i = count;
+			q.push(delta);
+		}
+
 	} else {
 		csenode->name = node->name;
 		q.push(csenode);
@@ -104,7 +118,7 @@ int countDelta(Node* node) {
 		} else if(q.front()->name == "->") {
 			count = count + 2;
 		} else if(q.front()->name == "tau") {
-			count++;
+			count = count + node->count;
 		}
 		q.pop();
 	}
@@ -161,5 +175,19 @@ void printMap(map<string, cseNode> *inmap) {
 	cout << (*inmap).size() << "\n";
 	for(iter iterator = (*inmap).begin(); iterator != (*inmap).end(); ++iterator) {
 		cout << "hi\n";
+	}
+}
+
+void printDeltas(int lambdas, queue<cseNode*>* deltas[]) {
+
+	cout << "printing deltas : \n";
+	for(int j = 0; j < lambdas; j++) {
+		queue<cseNode*> qu = *deltas[j];
+		cout << "D" << j << ":\n";
+		while(!qu.empty()) {
+			cout << qu.front()->name << "\n";
+			qu.pop();
+		}
+		cout << "\n";
 	}
 }

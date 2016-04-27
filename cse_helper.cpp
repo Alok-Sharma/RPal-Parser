@@ -5,18 +5,20 @@
 using namespace std;
 
 
-const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "aug", "or", "eq", "ne", "**"};
+const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "and", "or", "eq", "ne", "**"};
 vector<string> cse_binaryops (binaryops, binaryops + sizeof(binaryops) / sizeof(binaryops[0]));
 
 const string unaryops[] = {"not", "neg"};
 vector<string> cse_unaryops (unaryops, unaryops + sizeof(unaryops) / sizeof(unaryops[0]));
 
 void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string, cseNode>* environs[], queue<cseNode*>* deltas[]) {
+	cout << "sup\n";
 	cseNode* csenode;
 	while(!controlStack.empty()) {
 		csenode = controlStack.top();
 		string nodename = csenode->name;
 		string nodetype = csenode->type;
+
 		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>") {
 			programStack.push(csenode);
 			controlStack.pop();
@@ -87,6 +89,30 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 				loadDelta(controlStack, deltaIndex, deltas);
 			}
 
+		} else if(nodename == "delta") {
+			cout << "delta\n";
+			int deltaIndex = csenode->i;
+			controlStack.pop();
+			loadDelta(controlStack, deltaIndex, deltas);
+
+		} else if(nodename == "tau") {
+			cout << "tau\n";
+			int tauSize = csenode->i;
+			controlStack.pop(); //pop the tau
+			cseNode* result = createTuple(tauSize, programStack);
+			programStack.push(result);
+
+		} 
+		else if(nodename == "gamma" && programStack.top()->type == "TUPLE") {
+			controlStack.pop(); //pop gamma;
+			string tuple = programStack.top()->name;
+			programStack.pop(); //pop the tuple
+			int tupleIndex = extractInt(programStack.top()->name);
+			programStack.pop(); //pop the int
+
+			cseNode* result = getTupleIndex(tuple, tupleIndex);
+			programStack.push(result);
+
 		} else if(nodetype == "e") {
 			controlStack.pop(); //pop the e from control
 			environStack.pop(); //pop from env stack
@@ -127,6 +153,40 @@ string extractId(string input) {
 	return result;
 }
 
+cseNode* createTuple(int n, stack<cseNode*> &programStack) {
+
+	string tuple = "(";
+	for(int i = 0; i < n; i ++) {
+		if(i >= 1) {
+			tuple = tuple + ", ";
+		}
+		tuple = tuple + programStack.top()->name;
+		programStack.pop();
+	}
+	tuple = tuple + ")";
+	cseNode* result = createCseNode("TUPLE", tuple);
+	return result;
+}
+
+cseNode* getTupleIndex(string tuple, int index) {
+	string commaValues = tuple.substr(1, tuple.length() - 2);
+	cout << "comma vals: " << commaValues << "\n";
+	vector<string> result;
+	stringstream ss(commaValues);
+	
+	while(ss.good()) {
+    	string substr;
+    	getline(ss, substr, ',');
+    	result.push_back(substr);
+	}
+
+	string value = result[index - 1]; //rpal indices start from 1
+	value.erase(value.begin(), std::find_if(value.begin(), value.end(), std::bind1st(std::not_equal_to<char>(), ' '))); //remove trailing spaces
+	cseNode* resultNode = createCseNode("", value);
+	return resultNode;
+}
+
+//from the input environment, get the value of the input key
 cseNode* getIdValue(map<string, cseNode> *env, string key) {
 	map<string, cseNode>::iterator iter;
 	iter = (*env).find(key);
@@ -143,22 +203,98 @@ cseNode* executeBinaryOps(string op, string s_int1, string s_int2) {
 	cseNode* resultNode;
 
 	if(op == "+") {
-		int int1 = extractInt(s_int1); //extract the two numbers
-		int int2 = extractInt(s_int2);
-		int result = int1 + int2;
+		int result = extractInt(s_int1) + extractInt(s_int2);
 		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
-	} else if(op == "eq") {
-		int int1 = extractInt(s_int1); //extract the two numbers
-		int int2 = extractInt(s_int2);
-		bool bresult = (int1 == int2);
+
+	} else if(op == "-") {
+		int result = extractInt(s_int1) - extractInt(s_int2);
+		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+
+	} else if(op == "/") {
+		int result = extractInt(s_int1) / extractInt(s_int2);
+		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+
+	} else if(op == "*") {
+		int result = extractInt(s_int1) * extractInt(s_int2);
+		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+
+	} else if(op == "**") {
+		int result = pow(extractInt(s_int1), extractInt(s_int2));
+		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+
+	} else if(op == "<" || op == "ls") {
+		bool bresult = extractInt(s_int1) < extractInt(s_int2);
 		string result;
 		if (bresult) {
 			result = "true";
-		}
-		else {
+		} else {
 			result = "false";
 		}
 		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == "<=" || op == "le") {
+		bool bresult = extractInt(s_int1) <= extractInt(s_int2);
+		string result;
+		if (bresult) {
+			result = "true";
+		} else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == ">" || op == "gr") {
+		bool bresult = extractInt(s_int1) > extractInt(s_int2);
+		string result;
+		if (bresult) {
+			result = "true";
+		} else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == ">=" || op == "ge") {
+		bool bresult = extractInt(s_int1) >= extractInt(s_int2);
+		string result;
+		if (bresult) {
+			result = "true";
+		} else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == "eq") {
+		bool bresult = (extractInt(s_int1) == extractInt(s_int2));
+		string result;
+		if (bresult) {
+			result = "true";
+		} else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == "nq") {
+		bool bresult = (extractInt(s_int1) != extractInt(s_int2));
+		string result;
+		if (bresult) {
+			result = "true";
+		} else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+
+	} else if(op == "or" || op == "|") {
+		if(s_int1 == "<false>" && s_int2 == "<false>") {
+			resultNode = createCseNode("BOOL", "<false>");
+		} else {
+			resultNode = createCseNode("BOOL", "<true>");	
+		}
+
+	} else if(op == "and") {
+		if(s_int1 == "<true>" && s_int2 == "<true>") {
+			resultNode = createCseNode("BOOL", "<true>");
+		} else {
+			resultNode = createCseNode("BOOL", "<false>");	
+		}
 	}
 	return resultNode;
 }

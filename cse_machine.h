@@ -9,6 +9,10 @@
 #include <stack>
 #include <cstdlib>
 #include <string>
+#include <sstream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
 
 using namespace std;
 
@@ -48,6 +52,7 @@ cseNode* createNextEnvironment(map<string, cseNode>*[]);
 void loadDelta(stack<cseNode*>&, int, queue<cseNode*>*[]);
 void printStack(stack<cseNode*>);
 void printMap(map<string, cseNode>*);
+void printDeltas (int, queue<cseNode*>*[]);
 
 //cse_helper functions
 void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[], queue<cseNode*>*[]);
@@ -57,6 +62,8 @@ cseNode* executeBinaryOps(string, string, string);
 cseNode* executeUnaryOps(string, string);
 int extractInt(string);
 string extractId(string);
+cseNode* createTuple(int, stack<cseNode*>&);
 cseNode* getIdValue(map<string, cseNode>*, string);
+cseNode* getTupleIndex(string, int);
 
 #endif

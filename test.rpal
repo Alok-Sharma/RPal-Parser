@@ -1,1 +1,1 @@
-let a = 4 in a eq 5 -> a+1 | a+3
+let a = (4,5) in a 2
