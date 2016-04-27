@@ -1,2 +1,1 @@
-Print ( ((fn a1. (fn b1. b1) a1) 1)  eq ((fn a2. (fn b2. b2+2) a2)(-1))
-        -> true | false )
+let a = (1,2) in Print (a aug 3)

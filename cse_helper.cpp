@@ -5,7 +5,7 @@
 using namespace std;
 
 
-const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "and", "or", "eq", "ne", "**"};
+const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "and", "or", "eq", "ne", "**", "aug"};
 vector<string> cse_binaryops (binaryops, binaryops + sizeof(binaryops) / sizeof(binaryops[0]));
 
 const string unaryops[] = {"not", "neg"};
@@ -56,7 +56,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			map<string, cseNode> *currentEnv = environs[environCount - 1];
 
 			//TODO: SUPER UGLY. TAKE CONTENTS OF THIS IF INTO FUNCTION.
-			if(valueNode->type == "TUPLE") {
+			if(valueNode->type == "TUPLE" && lambda->type == "n-ary") {
 				string vtuple = valueNode->name;
 				vtuple = vtuple.substr(1, vtuple.length() - 2);
 				vector<string> valTuple;
@@ -157,11 +157,11 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Print>") {
 			controlStack.pop();
 			programStack.pop();
-			string str = programStack.top()->name;
-			programStack.pop(); // to pop or not to pop?
+
+			mPrint(programStack.top()->name, programStack.top()->type);
+			programStack.pop();
 			cseNode* dummy = createCseNode("DUMMY", "<dummy>");
 			programStack.push(dummy);
-			mPrint(str);
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			controlStack.pop();
 		}
@@ -175,8 +175,31 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 	// cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
 }
 
-void mPrint(string nodename) {
-	if(isId(nodename)) {
+void mPrint(string nodename, string nodetype) {
+	//handle printing a tuple first.
+	if(nodetype == "TUPLE") {
+		string commaValues = nodename.substr(1, nodename.length() - 2); //strip the brackets
+		vector<string> result;
+		stringstream ss(commaValues);
+
+		while(ss.good()) {
+			string value;
+			getline(ss, value, ',');
+			value.erase(value.begin(), std::find_if(value.begin(), value.end(), std::bind1st(std::not_equal_to<char>(), ' '))); //remove trailing spaces
+			result.push_back(value);
+		}
+
+		string output = "";
+		for(int i = 0; i < result.size(); i++) {
+			int t = extractInt(result[i]);  //TODO: ASSUMING TUPLES HAS INTEGERS ONLY
+			if(i >= 1) {
+				output = output + ", ";
+			}
+			output = output + patch::to_string(t);
+		}
+
+		cout << output;
+	} else if(isId(nodename)) {
 		cout << extractId(nodename);
 	} else if(isStr(nodename)) {
 		cout << extractStr(nodename);
@@ -230,7 +253,7 @@ return result;
 }
 
 cseNode* getTupleIndex(string tuple, int index) {
-	string commaValues = tuple.substr(1, tuple.length() - 2);
+	string commaValues = tuple.substr(1, tuple.length() - 2); //strip the brackets
 	// cout << "comma vals: " << commaValues << "\n";
 	vector<string> result;
 	stringstream ss(commaValues);
@@ -356,6 +379,11 @@ cseNode* executeBinaryOps(string op, string s_int1, string s_int2) {
 		} else {
 			resultNode = createCseNode("BOOL", "<false>");	
 		}
+
+	} else if(op == "aug") {
+		string toInsert = ", " + s_int2;
+		s_int1.insert(s_int1.length() - 1, toInsert);
+		resultNode = createCseNode("TUPLE", s_int1);
 	}
 	return resultNode;
 }

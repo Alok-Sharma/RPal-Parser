@@ -62,6 +62,7 @@ void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* r
 				}
 				result = result + node->child[0]->child[i]->name;
 			}
+			csenode->type = "n-ary";
 			csenode->x = result;
 		} else {
 			csenode->x = node->child[0]->name;	
