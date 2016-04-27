@@ -189,7 +189,7 @@ void mPrint(string nodename, string nodetype) {
 			result.push_back(value);
 		}
 
-		string output = "";
+		string output = "(";
 		for(int i = 0; i < result.size(); i++) {
 			int t = extractInt(result[i]);  //TODO: ASSUMING TUPLES HAS INTEGERS ONLY
 			if(i >= 1) {
@@ -198,7 +198,7 @@ void mPrint(string nodename, string nodetype) {
 			output = output + patch::to_string(t);
 		}
 
-		cout << output;
+		cout << output << ")";
 	} else if(isId(nodename)) {
 		cout << extractId(nodename);
 	} else if(isStr(nodename)) {
