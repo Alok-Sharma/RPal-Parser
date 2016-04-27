@@ -55,7 +55,7 @@ void printMap(map<string, cseNode>*);
 void printDeltas (int, queue<cseNode*>*[]);
 
 //cse_helper functions
-void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[], queue<cseNode*>*[]);
+void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[], queue<cseNode*>*[], int);
 bool isInt(string);
 bool isStr(string);
 bool isId(string);

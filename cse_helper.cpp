@@ -11,20 +11,23 @@ vector<string> cse_binaryops (binaryops, binaryops + sizeof(binaryops) / sizeof(
 const string unaryops[] = {"not", "neg"};
 vector<string> cse_unaryops (unaryops, unaryops + sizeof(unaryops) / sizeof(unaryops[0]));
 
-void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string, cseNode>* environs[], queue<cseNode*>* deltas[]) {
+void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string, cseNode>* environs[], queue<cseNode*>* deltas[], int numOfDelta) {
 	cseNode* csenode;
+	cseNode* lambdas[numOfDelta];
+
 	while(!controlStack.empty()) {
 		csenode = controlStack.top();
 		string nodename = csenode->name;
 		string nodetype = csenode->type;
 
-		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>" || nodetype == "function" || isStr(nodename)) {
+		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>" || nodetype == "function" || isStr(nodename) || nodename == "<Y*>") {
 			programStack.push(csenode);
 			controlStack.pop();
 
 		} else if(nodename == "lambda") {
 			csenode->k = environCount - 1; //update the parent env.
 			programStack.push(csenode);
+			lambdas[csenode->i] = csenode;
 			controlStack.pop();
 
 		} else if(contains(cse_binaryops, nodename)) {
@@ -50,10 +53,12 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			controlStack.push(newEnv); //push the new env node to control
 
 			cseNode* lambda = programStack.top(); //get the lambda from the program stack
+			// cout << "lambda (i)" << lambda->i << " (x)" << lambda->x << " (k)" << lambda->k << "\n";
+			
 			int i = lambda->i; //get lambdas i number (delta number)
 			programStack.pop(); //pop the lambda
 			cseNode* valueNode = programStack.top(); //pop the next token from the program stack, add it as a value to the x in the new environs map
-			map<string, cseNode> *currentEnv = environs[environCount - 1];
+			map<string, cseNode> *currentEnv = environs[environStack.top()];
 
 			//TODO: SUPER UGLY. TAKE CONTENTS OF THIS IF INTO FUNCTION.
 			if(valueNode->type == "TUPLE" && lambda->type == "n-ary") {
@@ -97,7 +102,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		} else if(isId(nodename)) {
 			string id = extractId(nodename);
 			controlStack.pop(); //pop the ID node from control
-			map<string, cseNode> *currentEnv = environs[environCount - 1];
+			map<string, cseNode> *currentEnv = environs[environStack.top()];
 			cseNode* idValue = getIdValue(currentEnv, id);
 			programStack.push(idValue); //push the ID value to the program
 
@@ -133,9 +138,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			cseNode* result = createTuple(tauSize, programStack);
 			programStack.push(result);
 
-		} 
-		else if(nodename == "gamma" && programStack.top()->type == "TUPLE") {
-			cout<< "sup\n";
+		} else if(nodename == "gamma" && programStack.top()->type == "TUPLE") {
 			controlStack.pop(); //pop gamma;
 			string tuple = programStack.top()->name;
 			programStack.pop(); //pop the tuple
@@ -144,6 +147,29 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 
 			cseNode* result = getTupleIndex(tuple, tupleIndex);
 			programStack.push(result);
+
+		} else if(nodename == "gamma" && programStack.top()->name == "<Y*>") {
+			controlStack.pop(); //pop the gamma
+			programStack.pop(); //pop the ystar
+			cseNode* lambda = programStack.top();
+			cseNode* eta = createCseNode("ETA", "eta");
+
+			eta->i = lambda->i;
+			eta->x = lambda->x;
+			eta->k = lambda->k;
+
+			programStack.pop(); //pop the lambda
+			programStack.push(eta); //push the eta;
+			// cout << "pushed eta (i)" << eta->i << " (x)" << eta->x << " (k)" << eta->k << "\n";
+
+		} else if(nodename == "gamma" && programStack.top()->type == "ETA") {
+			cseNode* gamma = createCseNode("gamma", "gamma");
+			controlStack.push(gamma); //push another gamma onto control stack
+
+			cseNode* eta = programStack.top();
+			int lambdaIndex = eta->i;
+			cseNode* lambda = lambdas[lambdaIndex];
+			programStack.push(lambda);
 
 		} else if(nodetype == "e") {
 			controlStack.pop(); //pop the e from control

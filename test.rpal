@@ -1,8 +1,1 @@
-Print (
-let f x y =
-(let g x y =
-(let h x y = x y x
-in h)
-in g)
-in f
-)
+let rec f n = n eq 1 -> 1 | n * f (n - 1) in Print(f 3)
