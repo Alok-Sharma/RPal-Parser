@@ -102,9 +102,10 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.push(idValue); //push the ID value to the program
 
 		} else if(nodename == "beta") {
-			controlStack.pop();
+			controlStack.pop(); //pop the beta
 			string b = programStack.top()->name;
-			
+			programStack.pop(); //pop the boolean
+
 			if(b == "<false>") {
 				cseNode* elseDelta = controlStack.top();
 				int deltaIndex = elseDelta->i;
@@ -116,7 +117,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 				controlStack.pop(); //get rid of else delta
 				cseNode* thenDelta = controlStack.top();
 				int deltaIndex = thenDelta->i;
-				controlStack.pop();
+				controlStack.pop(); //get rid of the if delta
 
 				loadDelta(controlStack, deltaIndex, deltas);
 			}
@@ -181,6 +182,8 @@ void mPrint(string nodename) {
 		cout << extractStr(nodename);
 	} else if(isInt(nodename)) {
 		cout << extractInt(nodename);
+	} else if(nodename == "<true>" || nodename == "<false>") {
+		cout << nodename.substr(1, nodename.length() - 2);
 	}
 }
 
