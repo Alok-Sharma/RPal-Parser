@@ -59,7 +59,7 @@ void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[]
 bool isInt(string);
 bool isStr(string);
 bool isId(string);
-void mPrint(string, string);
+void mPrint(cseNode*);
 cseNode* executeBinaryOps(string, string, string);
 cseNode* executeUnaryOps(string, string);
 int extractInt(string);

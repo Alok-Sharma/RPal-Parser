@@ -158,24 +158,26 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			controlStack.pop();
 			programStack.pop();
 
-			mPrint(programStack.top()->name, programStack.top()->type);
+			mPrint(programStack.top());
 			programStack.pop();
 			cseNode* dummy = createCseNode("DUMMY", "<dummy>");
 			programStack.push(dummy);
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			controlStack.pop();
 		}
-		// cout << "----\ncontrol:\n";
-		// printStack(controlStack);
-		// cout << "\nprogram:\n";
-		// printStack(programStack);
+		cout << "----\ncontrol:\n";
+		printStack(controlStack);
+		cout << "\nprogram:\n";
+		printStack(programStack);
 	}
 	cout << "\n";
 	//print the final output
 	// cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
 }
 
-void mPrint(string nodename, string nodetype) {
+void mPrint(cseNode* node) {
+	string nodetype = node->type;
+	string nodename = node->name;
 	//handle printing a tuple first.
 	if(nodetype == "TUPLE") {
 		string commaValues = nodename.substr(1, nodename.length() - 2); //strip the brackets
@@ -207,6 +209,8 @@ void mPrint(string nodename, string nodetype) {
 		cout << extractInt(nodename);
 	} else if(nodename == "<true>" || nodename == "<false>") {
 		cout << nodename.substr(1, nodename.length() - 2);
+	} else if(nodename == "lambda") {
+		cout << "[lambda closure: " << extractId(node->x) << ": " << node->i << "]";
 	}
 }
 
