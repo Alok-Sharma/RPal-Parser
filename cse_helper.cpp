@@ -23,6 +23,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			controlStack.pop();
 
 		} else if(nodename == "lambda") {
+			csenode->k = environCount - 1; //update the parent env.
 			programStack.push(csenode);
 			controlStack.pop();
 
@@ -45,13 +46,12 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 
 		} else if(nodename == "gamma" && programStack.top()->name == "lambda") {
 			controlStack.pop(); // pop the gamma
-			cseNode* newEnv = createNextEnvironment(environs); //create a new environment
+			cseNode* newEnv = createNextEnvironment(environs, programStack.top()->k); //create a new environment
 			controlStack.push(newEnv); //push the new env node to control
 
 			cseNode* lambda = programStack.top(); //get the lambda from the program stack
 			int i = lambda->i; //get lambdas i number (delta number)
 			programStack.pop(); //pop the lambda
-
 			cseNode* valueNode = programStack.top(); //pop the next token from the program stack, add it as a value to the x in the new environs map
 			map<string, cseNode> *currentEnv = environs[environCount - 1];
 
@@ -251,7 +251,7 @@ cseNode* getIdValue(map<string, cseNode> *env, string key) {
 	if(iter != (*env).end()) {
 		return &(iter->second);
 	} else {
-		cout << "Error, did not find " << key << " in environment.";
+		cout << "Error, did not find the variable '" << key << "' in environment." << "\n";
 		return NULL;
 	}
 }

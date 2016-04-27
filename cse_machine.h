@@ -48,7 +48,7 @@ void controlStructureHelper (Node*, queue<cseNode*>&, int&, Node*[]);
 void preorder(queue<Node*>&, Node*);
 int countDelta(Node*);
 cseNode* createCseNode(string, string);
-cseNode* createNextEnvironment(map<string, cseNode>*[]);
+cseNode* createNextEnvironment(map<string, cseNode>*[], int);
 void loadDelta(stack<cseNode*>&, int, queue<cseNode*>*[]);
 void printStack(stack<cseNode*>);
 void printMap(map<string, cseNode>*);

@@ -17,7 +17,7 @@ void evaluate(Node* root) {
 	stack<cseNode*> controlStack; // The control stack
 
 	//initilize the environment, control stack, and program stack;
-	cseNode* n = createNextEnvironment(environs); //create e0;
+	cseNode* n = createNextEnvironment(environs, -1); //create e0 with a negative parent index, indicating this env has no parents.
 	controlStack.push(n); //push e0 to control;
 	loadDelta(controlStack, 0, deltas); //push d0 to control;
 	programStack.push(n); // push e0 to program;
@@ -149,12 +149,13 @@ cseNode* createCseNode(string type, string name) {
 }
 
 // creates a new environment, and pushes it to the array of environ maps. Also returns a corresponding csenode for that environment.
-cseNode* createNextEnvironment(map<string, cseNode> *environs[]) {
+cseNode* createNextEnvironment(map<string, cseNode> *environs[], int parentIndex) {
 	cseNode* envNode = createCseNode("e", "e" + patch::to_string(environCount));
 	environs[environCount] = new map<string,cseNode>();
-	if(!environStack.empty()) {
+
+	//root env wont have a parent, will receive -1 as parent index.
+	if(parentIndex >= 0) {
 		//pop the top environment, and copy everything in its map into newly created map.
-		int parentIndex = environStack.top();
 		map<string, cseNode> parentEnv = *environs[parentIndex];
 		map<string, cseNode> *currentEnv = environs[environCount];
 		(*currentEnv).insert(parentEnv.begin(), parentEnv.end()); //hopefully a copy? Copy data from parent environment.
