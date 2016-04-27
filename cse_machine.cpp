@@ -4,10 +4,12 @@
 using namespace std;
 
 //TODO delete everything created using new
+stack<int> environStack;
+int environCount = 0;
 
 void evaluate(Node* root) {
 	int numOfLambda = countLambda(root);
-	map<string, string> *environs[numOfLambda + 1]; //pointer to an array of maps. Each map is an environment. e0 is at index 0, and so on.
+	map<string, cseNode> *environs[numOfLambda + 1]; //pointer to an array of maps. Each map is an environment. e0 is at index 0, and so on.
 	queue<cseNode*> *deltas[numOfLambda + 1]; // pointer to an array of queues of cseNodes. Each queue is a delta.
 	generateControlStructures(root, deltas); // populate the array of queues
 
@@ -20,9 +22,9 @@ void evaluate(Node* root) {
 	loadDelta(controlStack, 0, deltas); //push d0 to control;
 	programStack.push(n); // push e0 to program;
 
-	// startCseMachine(controlStack, programStack, environs, deltas);
+	startCseMachine(controlStack, programStack, environs, deltas);
 
-	printStack(programStack);
+	// printStack(programStack);
 
 
 	//------testing------//
@@ -94,19 +96,18 @@ cseNode* createCseNode(string type, string name) {
 }
 
 // creates a new environment, and pushes it to the array of environ maps. Also returns a corresponding csenode for that environment.
-cseNode* createNextEnvironment(map<string, string> *environs[]) {
+cseNode* createNextEnvironment(map<string, cseNode> *environs[]) {
 	cseNode* envNode = createCseNode("e", "e" + patch::to_string(environCount));
-	environs[environCount] = new map<string,string>();
+	environs[environCount] = new map<string,cseNode>();
 	if(!environStack.empty()) {
 		//pop the top environment, and copy everything in its map into newly created map.
 		int parentIndex = environStack.top();
-		map<string,string> parentEnv = *environs[parentIndex];
-		map<string,string> *currentEnv = environs[environCount];
+		map<string, cseNode> parentEnv = *environs[parentIndex];
+		map<string, cseNode> *currentEnv = environs[environCount];
 		(*currentEnv).insert(parentEnv.begin(), parentEnv.end()); //hopefully a copy? Copy data from parent environment.
 		// cout << "cur env size: " << currentEnv.size() << "\n";
 	}
 	environStack.push(environCount);
-	cout << "env stack top:" << environStack.top() <<"\n";
 	environCount = environCount + 1;
 	return envNode;
 }
@@ -124,7 +125,6 @@ void loadDelta(stack<cseNode*> &controlStack, int deltaNumber, queue<cseNode*>* 
 //printing a copy of the control stack, not the actual one. So dont worry if stuff is popped.
 void printStack(stack<cseNode*> instack) {
 	cseNode* node;
-	cout << "\nstack:" << "\n"; 
 	while(!instack.empty()) {
 		node = instack.top();
 		cout << node->name << " ";
@@ -133,8 +133,8 @@ void printStack(stack<cseNode*> instack) {
 	cout << "\n";
 }
 
-void printMap(map<string,string> *inmap) {
-	typedef map<string,string>::iterator iter;
+void printMap(map<string, cseNode> *inmap) {
+	typedef map<string, cseNode>::iterator iter;
 	cout << (*inmap).size() << "\n";
 	for(iter iterator = (*inmap).begin(); iterator != (*inmap).end(); ++iterator) {
 		cout << "hi\n";

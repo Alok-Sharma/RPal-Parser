@@ -34,8 +34,8 @@ namespace patch
 }
 
 
-static int environCount = 0;
-static stack<int> environStack;
+extern int environCount;
+extern stack<int> environStack;
 
 //cse_machine functions
 void evaluate(Node*);
@@ -44,16 +44,18 @@ void controlStructureHelper (Node*, queue<cseNode*>&, int&, Node*[]);
 void preorder(queue<Node*>&, Node*);
 int countLambda(Node*);
 cseNode* createCseNode(string, string);
-cseNode* createNextEnvironment(map<string, string>*[]);
+cseNode* createNextEnvironment(map<string, cseNode>*[]);
 void loadDelta(stack<cseNode*>&, int, queue<cseNode*>*[]);
 void printStack(stack<cseNode*>);
-void printMap(map<string,string>*);
+void printMap(map<string, cseNode>*);
 
 //cse_helper functions
-void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string,string>*[], queue<cseNode*>*[]);
+void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[], queue<cseNode*>*[]);
 bool isInt(string);
 bool isId(string);
 cseNode* executeBinaryOps(string, string, string);
 int extractInt(string);
+string extractId(string);
+cseNode* getIdValue(map<string, cseNode>*, string);
 
 #endif
