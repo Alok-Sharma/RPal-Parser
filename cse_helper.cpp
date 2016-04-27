@@ -12,7 +12,6 @@ const string unaryops[] = {"not", "neg"};
 vector<string> cse_unaryops (unaryops, unaryops + sizeof(unaryops) / sizeof(unaryops[0]));
 
 void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string, cseNode>* environs[], queue<cseNode*>* deltas[]) {
-	cout << "sup\n";
 	cseNode* csenode;
 	while(!controlStack.empty()) {
 		csenode = controlStack.top();
@@ -90,13 +89,11 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			}
 
 		} else if(nodename == "delta") {
-			cout << "delta\n";
 			int deltaIndex = csenode->i;
 			controlStack.pop();
 			loadDelta(controlStack, deltaIndex, deltas);
 
 		} else if(nodename == "tau") {
-			cout << "tau\n";
 			int tauSize = csenode->i;
 			controlStack.pop(); //pop the tau
 			cseNode* result = createTuple(tauSize, programStack);
@@ -129,18 +126,18 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); // to pop or not to pop?
 			cseNode* dummy = createCseNode("DUMMY", "<dummy>");
 			programStack.push(dummy);
-			cout<< str << "\n";
+			cout<< extractInt(str) << "\n";
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			// controlStack.pop();
 		}
-		cout << "----\ncontrol:\n";
-		printStack(controlStack);
-		cout << "\nprogram:\n";
-		printStack(programStack);
+		// cout << "----\ncontrol:\n";
+		// printStack(controlStack);
+		// cout << "\nprogram:\n";
+		// printStack(programStack);
 	}
 
 	//print the final output
-	cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
+	// cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
 }
 
 bool isInt(string nodename) {
@@ -178,7 +175,7 @@ cseNode* createTuple(int n, stack<cseNode*> &programStack) {
 
 cseNode* getTupleIndex(string tuple, int index) {
 	string commaValues = tuple.substr(1, tuple.length() - 2);
-	cout << "comma vals: " << commaValues << "\n";
+	// cout << "comma vals: " << commaValues << "\n";
 	vector<string> result;
 	stringstream ss(commaValues);
 	

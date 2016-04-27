@@ -22,7 +22,7 @@ void evaluate(Node* root) {
 	loadDelta(controlStack, 0, deltas); //push d0 to control;
 	programStack.push(n); // push e0 to program;
 
-	printDeltas(numOfDelta, deltas);
+	// printDeltas(numOfDelta, deltas);
 	startCseMachine(controlStack, programStack, environs, deltas);
 
 	// printStack(programStack);
