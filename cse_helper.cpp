@@ -129,7 +129,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.push(dummy);
 			mPrint(str);
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
-			// controlStack.pop();
+			controlStack.pop();
 		}
 		// cout << "----\ncontrol:\n";
 		// printStack(controlStack);
@@ -174,7 +174,7 @@ string extractId(string input) {
 }
 
 string extractStr(string input) {
-	string result = input.substr(5, input.length() - 6);
+	string result = input.substr(6, input.length() - 8);
 	return result;
 }
 
