@@ -50,12 +50,45 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 
 			cseNode* lambda = programStack.top(); //get the lambda from the program stack
 			int i = lambda->i; //get lambdas i number (delta number)
-			string x = extractId(lambda->x); //get lambdas x string
 			programStack.pop(); //pop the lambda
 
 			cseNode* valueNode = programStack.top(); //pop the next token from the program stack, add it as a value to the x in the new environs map
 			map<string, cseNode> *currentEnv = environs[environCount - 1];
-			(*currentEnv)[x] = *valueNode;
+
+			//TODO: SUPER UGLY. TAKE CONTENTS OF THIS IF INTO FUNCTION.
+			if(valueNode->type == "TUPLE") {
+				string vtuple = valueNode->name;
+				vtuple = vtuple.substr(1, vtuple.length() - 2);
+				vector<string> valTuple;
+				stringstream ss1(vtuple);
+
+				//extract the values
+				while(ss1.good()) {
+					string substr;
+					getline(ss1, substr, ',');
+					valTuple.push_back(substr);
+				}
+
+				//extract the keys
+				string ktuple = lambda->x;
+				vector<string> keyTuple;
+				stringstream ss2(ktuple);
+				while(ss2.good()) {
+					string substr;
+					getline(ss2, substr, ',');
+					keyTuple.push_back(substr);
+				}
+
+				for(int i = 0; i < valTuple.size(); i++) {
+					string value = valTuple[i];
+					value.erase(value.begin(), std::find_if(value.begin(), value.end(), std::bind1st(std::not_equal_to<char>(), ' '))); //remove trailing spaces
+					(*currentEnv)[extractId(keyTuple[i])] = *createCseNode("", value);
+				}
+
+			} else {
+				(*currentEnv)[extractId(lambda->x)] = *valueNode;
+			}
+
 			programStack.pop(); //pop the value
 			programStack.push(newEnv); //push the new env node to the program
 
@@ -181,16 +214,16 @@ string extractStr(string input) {
 cseNode* createTuple(int n, stack<cseNode*> &programStack) {
 
 	string tuple = "(";
-	for(int i = 0; i < n; i ++) {
-		if(i >= 1) {
-			tuple = tuple + ", ";
+		for(int i = 0; i < n; i ++) {
+			if(i >= 1) {
+				tuple = tuple + ", ";
+			}
+			tuple = tuple + programStack.top()->name;
+			programStack.pop();
 		}
-		tuple = tuple + programStack.top()->name;
-		programStack.pop();
-	}
-	tuple = tuple + ")";
-	cseNode* result = createCseNode("TUPLE", tuple);
-	return result;
+		tuple = tuple + ")";
+cseNode* result = createCseNode("TUPLE", tuple);
+return result;
 }
 
 cseNode* getTupleIndex(string tuple, int index) {
@@ -200,9 +233,9 @@ cseNode* getTupleIndex(string tuple, int index) {
 	stringstream ss(commaValues);
 	
 	while(ss.good()) {
-    	string substr;
-    	getline(ss, substr, ',');
-    	result.push_back(substr);
+		string substr;
+		getline(ss, substr, ',');
+		result.push_back(substr);
 	}
 
 	string value = result[index - 1]; //rpal indices start from 1
@@ -218,7 +251,7 @@ cseNode* getIdValue(map<string, cseNode> *env, string key) {
 	if(iter != (*env).end()) {
 		return &(iter->second);
 	} else {
-		cout << "Error, did not find ID in environment.";
+		cout << "Error, did not find " << key << " in environment.";
 		return NULL;
 	}
 }

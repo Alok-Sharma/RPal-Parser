@@ -1,1 +1,1 @@
-let a = 'hey' in Print(a)
+let a,b = 3,4 in Print( a)

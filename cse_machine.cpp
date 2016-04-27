@@ -53,7 +53,20 @@ void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* r
 	if(node->name == "lambda") {
 		csenode->name = "lambda";
 		csenode->i = ++count;
-		csenode->x = node->child[0]->name;
+
+		if(node->child[0]->name == ",") {
+			string result = "";
+			for(int i = 0; i < node->child[0]->count; i++) {
+				if(i >= 1) {
+					result = result +  ",";
+				}
+				result = result + node->child[0]->child[i]->name;
+			}
+			csenode->x = result;
+		} else {
+			csenode->x = node->child[0]->name;	
+		}
+		
 		q.push(csenode);
 		roots[count] = node->child[1];
 
