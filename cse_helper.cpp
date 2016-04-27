@@ -126,7 +126,9 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			controlStack.pop();
 			programStack.pop();
 			string str = programStack.top()->name;
-			// programStack.pop(); // to pop or not to pop?
+			programStack.pop(); // to pop or not to pop?
+			cseNode* dummy = createCseNode("DUMMY", "<dummy>");
+			programStack.push(dummy);
 			cout<< str << "\n";
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			// controlStack.pop();
