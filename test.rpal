@@ -1,1 +1,1 @@
-let a = 6 in a + 4
+let a = 4 in a eq 5 -> a+1 | a+3

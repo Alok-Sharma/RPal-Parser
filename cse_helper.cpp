@@ -5,10 +5,10 @@
 using namespace std;
 
 
-const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "aug", "or", "eq", "ne"};
+const string binaryops[] = {"+", "-", "*", "/", "<", "ls", "<=", "le", ">", "gr", ">=", "ge", "|", "aug", "or", "eq", "ne", "**"};
 vector<string> cse_binaryops (binaryops, binaryops + sizeof(binaryops) / sizeof(binaryops[0]));
 
-const string unaryops[] = {"not", "!", "**", "neg"};
+const string unaryops[] = {"not", "neg"};
 vector<string> cse_unaryops (unaryops, unaryops + sizeof(unaryops) / sizeof(unaryops[0]));
 
 void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStack, map<string, cseNode>* environs[], queue<cseNode*>* deltas[]) {
@@ -17,15 +17,15 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		csenode = controlStack.top();
 		string nodename = csenode->name;
 		string nodetype = csenode->type;
+		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>") {
+			programStack.push(csenode);
+			controlStack.pop();
 
-		if(isInt(nodename)) {
+		} else if(nodename == "lambda") {
 			programStack.push(csenode);
 			controlStack.pop();
-		} else if(nodename == "lambda") {    // ------ RULE 2 ------//
-			programStack.push(csenode);
-			controlStack.pop();
+
 		} else if(contains(cse_binaryops, nodename)) {
-			cout << "found " << nodename << "\n";
 			controlStack.pop(); //pop the binary op
 
 			string s_int1 = programStack.top()->name; //extract the two integers you want to execute the binary op on.
@@ -34,8 +34,15 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop();
 			cseNode* resultNode = executeBinaryOps(nodename, s_int1, s_int2);
 			programStack.push(resultNode);
-		} 
-		else if(nodename == "gamma" && programStack.top()->name == "lambda") {
+
+		} else if(contains(cse_unaryops, nodename)) {
+			controlStack.pop(); //pop the unary
+			string input = programStack.top()->name;
+			programStack.pop();
+			cseNode* resultNode = executeUnaryOps(nodename, input);
+			programStack.push(resultNode);
+
+		} else if(nodename == "gamma" && programStack.top()->name == "lambda") {
 			controlStack.pop(); // pop the gamma
 			cseNode* newEnv = createNextEnvironment(environs); //create a new environment
 			controlStack.push(newEnv); //push the new env node to control
@@ -53,13 +60,33 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 
 			loadDelta(controlStack, i, deltas); //get the delta queue based on the delta number and load on to program stack.
 
-		} 
-		else if(isId(nodename)) {
+		} else if(isId(nodename)) {
 			string id = extractId(nodename);
 			controlStack.pop(); //pop the ID node from control
 			map<string, cseNode> *currentEnv = environs[environCount - 1];
 			cseNode* idValue = getIdValue(currentEnv, id);
 			programStack.push(idValue); //push the ID value to the program
+
+		} else if(nodename == "beta") {
+			controlStack.pop();
+			string b = programStack.top()->name;
+			
+			if(b == "<false>") {
+				cseNode* elseDelta = controlStack.top();
+				int deltaIndex = elseDelta->i;
+				controlStack.pop();
+				controlStack.pop();
+
+				loadDelta(controlStack, deltaIndex, deltas);
+			} else if(b == "<true>") {
+				controlStack.pop(); //get rid of else delta
+				cseNode* thenDelta = controlStack.top();
+				int deltaIndex = thenDelta->i;
+				controlStack.pop();
+
+				loadDelta(controlStack, deltaIndex, deltas);
+			}
+
 		} else if(nodetype == "e") {
 			controlStack.pop(); //pop the e from control
 			environStack.pop(); //pop from env stack
@@ -68,8 +95,8 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); //pop the top value from the prog stack
 			programStack.pop(); //pop the e from prog stack
 			programStack.push(popVal); //push back the top val
-		}
-		 else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
+
+		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			// controlStack.pop();
 		}
 		cout << "----\ncontrol:\n";
@@ -113,13 +140,45 @@ cseNode* getIdValue(map<string, cseNode> *env, string key) {
 
 cseNode* executeBinaryOps(string op, string s_int1, string s_int2) {
 	// s_int1 op s_int2
-	int int1 = extractInt(s_int1); //extract the two numbers
-	int int2 = extractInt(s_int2);
 	cseNode* resultNode;
 
 	if(op == "+") {
+		int int1 = extractInt(s_int1); //extract the two numbers
+		int int2 = extractInt(s_int2);
 		int result = int1 + int2;
 		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+	} else if(op == "eq") {
+		int int1 = extractInt(s_int1); //extract the two numbers
+		int int2 = extractInt(s_int2);
+		bool bresult = (int1 == int2);
+		string result;
+		if (bresult) {
+			result = "true";
+		}
+		else {
+			result = "false";
+		}
+		resultNode = createCseNode("BOOL", "<" + result + ">");
+	}
+	return resultNode;
+}
+
+cseNode* executeUnaryOps(string op, string input) {
+	cseNode* resultNode;
+
+	//BUG: NEG CRASHES.
+	if(op == "neg") {
+		int int1 = extractInt(input);
+		int result = -int1;
+		resultNode = createCseNode("INT", "<INT:" + patch::to_string(result) + ">");
+	} else if(op == "not") {
+		if(input == "<true>") {
+			resultNode = createCseNode("BOOL", "<false>");
+		} else if(input == "<false>") {
+			resultNode = createCseNode("BOOL", "<true>");
+		} else {
+			cout << "Error, attempt to apply boolean operator on non-boolean expression." << "\n";
+		}
 	}
 	return resultNode;
 }

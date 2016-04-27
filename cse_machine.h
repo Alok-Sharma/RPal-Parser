@@ -42,7 +42,7 @@ void evaluate(Node*);
 void generateControlStructures(Node*, queue<cseNode*>*[]);
 void controlStructureHelper (Node*, queue<cseNode*>&, int&, Node*[]);
 void preorder(queue<Node*>&, Node*);
-int countLambda(Node*);
+int countDelta(Node*);
 cseNode* createCseNode(string, string);
 cseNode* createNextEnvironment(map<string, cseNode>*[]);
 void loadDelta(stack<cseNode*>&, int, queue<cseNode*>*[]);
@@ -54,6 +54,7 @@ void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[]
 bool isInt(string);
 bool isId(string);
 cseNode* executeBinaryOps(string, string, string);
+cseNode* executeUnaryOps(string, string);
 int extractInt(string);
 string extractId(string);
 cseNode* getIdValue(map<string, cseNode>*, string);

@@ -8,9 +8,9 @@ stack<int> environStack;
 int environCount = 0;
 
 void evaluate(Node* root) {
-	int numOfLambda = countLambda(root);
-	map<string, cseNode> *environs[numOfLambda + 1]; //pointer to an array of maps. Each map is an environment. e0 is at index 0, and so on.
-	queue<cseNode*> *deltas[numOfLambda + 1]; // pointer to an array of queues of cseNodes. Each queue is a delta.
+	int numOfDelta = countDelta(root);
+	map<string, cseNode> *environs[numOfDelta]; //pointer to an array of maps. Each map is an environment. e0 is at index 0, and so on.
+	queue<cseNode*> *deltas[numOfDelta]; // pointer to an array of queues of cseNodes. Each queue is a delta.
 	generateControlStructures(root, deltas); // populate the array of queues
 
 	stack<cseNode*> programStack; // The program stack	
@@ -36,12 +36,12 @@ void evaluate(Node* root) {
 }
 
 void generateControlStructures(Node* node, queue<cseNode*>* deltas[]) {
-	int numOfLambda = countLambda(node);
-	Node *roots[numOfLambda + 1];
+	int numOfDelta = countDelta(node);
+	Node *roots[numOfDelta];
 	roots[0] = node;
 	int count = 0;
 	
-	for(int i = 0; i < numOfLambda + 1; i++) {
+	for(int i = 0; i < numOfDelta; i++) {
 		deltas[i] = new queue<cseNode*>;
 		controlStructureHelper(roots[i], *deltas[i], count, roots);	
 	}
@@ -56,31 +56,54 @@ void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* r
 		csenode->x = node->child[0]->name;
 		q.push(csenode);
 		roots[count] = node->child[1];
+
+	} else if(node->name == "->") {
+		cseNode* delta1 = new cseNode;
+		delta1->name = "delta";
+		delta1->type = "delta_true";
+		delta1->i = ++count;
+		roots[count] = node->child[1];
+		q.push(delta1);
+
+		cseNode* delta2 = new cseNode;
+		delta2->name = "delta";
+		delta2->type = "delta_false";
+		delta2->i = ++count;
+		roots[count] = node->child[2];
+		q.push(delta2);
+
+		csenode->name = "beta";
+		q.push(csenode);
+
+		controlStructureHelper(node->child[0], q, count, roots);
+
 	} else {
 		csenode->name = node->name;
 		q.push(csenode);
 
-		if(node->count > 0) {
-			controlStructureHelper(node->child[0], q, count, roots);
-			controlStructureHelper(node->child[1], q, count, roots);
+		for(int i = 0; i < node->count; i++) {
+			controlStructureHelper(node->child[i], q, count, roots);
 		}
 	}
 }
 
 void preorder(queue<Node*> &q, Node* n) {
 	q.push(n);
-	if(n->count > 0) {
-		preorder(q, n->child[0]);
-		preorder(q, n->child[1]);
+	for(int i = 0; i < n->count; i++) {
+		preorder(q, n->child[i]);
 	}
 }
 
-int countLambda(Node* node) {
+int countDelta(Node* node) {
 	queue<Node*> q;
 	preorder(q, node);
-	int count = 0;
+	int count = 1;
 	while(!q.empty()) {
 		if(q.front()->name == "lambda") {
+			count++;
+		} else if(q.front()->name == "->") {
+			count = count + 2;
+		} else if(q.front()->name == "tau") {
 			count++;
 		}
 		q.pop();
