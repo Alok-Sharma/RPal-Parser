@@ -169,18 +169,18 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		// cout << "\nprogram:\n";
 		// printStack(programStack);
 	}
-
+	cout << "\n";
 	//print the final output
 	// cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
 }
 
 void mPrint(string nodename) {
 	if(isId(nodename)) {
-		cout << extractId(nodename) << "\n";
+		cout << extractId(nodename);
 	} else if(isStr(nodename)) {
-		cout << extractStr(nodename) << "\n";
+		cout << extractStr(nodename);
 	} else if(isInt(nodename)) {
-		cout << extractInt(nodename) << "\n";
+		cout << extractInt(nodename);
 	}
 }
 
