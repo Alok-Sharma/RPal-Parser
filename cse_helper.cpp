@@ -18,7 +18,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		string nodename = csenode->name;
 		string nodetype = csenode->type;
 
-		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>" || nodetype == "function") {
+		if(isInt(nodename) || nodename == "<true>" || nodename == "<false>" || nodetype == "function" || isStr(nodename)) {
 			programStack.push(csenode);
 			controlStack.pop();
 
@@ -101,6 +101,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 
 		} 
 		else if(nodename == "gamma" && programStack.top()->type == "TUPLE") {
+			cout<< "sup\n";
 			controlStack.pop(); //pop gamma;
 			string tuple = programStack.top()->name;
 			programStack.pop(); //pop the tuple
@@ -126,7 +127,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); // to pop or not to pop?
 			cseNode* dummy = createCseNode("DUMMY", "<dummy>");
 			programStack.push(dummy);
-			cout<< extractInt(str) << "\n";
+			mPrint(str);
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			// controlStack.pop();
 		}
@@ -140,8 +141,22 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 	// cout << "\nAnswer: " << extractInt(programStack.top()->name) << "\n";
 }
 
+void mPrint(string nodename) {
+	if(isId(nodename)) {
+		cout << extractId(nodename) << "\n";
+	} else if(isStr(nodename)) {
+		cout << extractStr(nodename) << "\n";
+	} else if(isInt(nodename)) {
+		cout << extractInt(nodename) << "\n";
+	}
+}
+
 bool isInt(string nodename) {
 	return nodename.find("<INT:") != std::string::npos;
+}
+
+bool isStr(string nodename) {
+	return nodename.find("<STR:") != std::string::npos;	
 }
 
 bool isId(string nodename) {
@@ -155,6 +170,11 @@ int extractInt(string input) {
 
 string extractId(string input) {
 	string result = input.substr(4, input.length() - 5);
+	return result;
+}
+
+string extractStr(string input) {
+	string result = input.substr(5, input.length() - 6);
 	return result;
 }
 

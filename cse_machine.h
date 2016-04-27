@@ -57,11 +57,14 @@ void printDeltas (int, queue<cseNode*>*[]);
 //cse_helper functions
 void startCseMachine(stack<cseNode*>&, stack<cseNode*>&, map<string, cseNode>*[], queue<cseNode*>*[]);
 bool isInt(string);
+bool isStr(string);
 bool isId(string);
+void mPrint(string);
 cseNode* executeBinaryOps(string, string, string);
 cseNode* executeUnaryOps(string, string);
 int extractInt(string);
 string extractId(string);
+string extractStr(string);
 cseNode* createTuple(int, stack<cseNode*>&);
 cseNode* getIdValue(map<string, cseNode>*, string);
 cseNode* getTupleIndex(string, int);

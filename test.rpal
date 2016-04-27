@@ -1,1 +1,1 @@
-let a = 3 in Print(a)
+(fn a. Print( a ) ) 'Hello\tWorld.\nHai'
