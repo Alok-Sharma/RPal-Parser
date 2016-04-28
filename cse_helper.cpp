@@ -189,13 +189,26 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			cseNode* node;
 			if(isStr(result)) {
 				result = extractStr(result);
-				result = string(&result[0]);
-				node = createCseNode("", "<STR:" + result + ">");
+				node = createCseNode("", "<STR:" + result.substr(0,1) + ">");
 			} else if(isInt(result)) {
 				result = extractInt(result);
-				result = string(&result[0]);
-				node = createCseNode("", "<INT:" + result + ">");
+				node = createCseNode("", "<INT:" + result.substr(0,1) + ">");
 			}
+			programStack.push(node);
+
+		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Conc>") {
+			controlStack.pop();
+			controlStack.pop(); //pop the two gammas
+			programStack.pop(); //pop the conc
+
+			string st1 = programStack.top()->name;
+			st1 = extractStr(st1);
+			programStack.pop();
+			string st2 = programStack.top()->name;
+			st2 = extractStr(st2);
+
+			string result = st1 + st2;
+			cseNode* node = createCseNode("", "<STR:'" + result + "'>");
 			programStack.push(node);
 
 		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Print>") {
@@ -209,10 +222,10 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			controlStack.pop();
 		}
-		// cout << "----\ncontrol:\n";
-		// printStack(controlStack);
-		// cout << "\nprogram:\n";
-		// printStack(programStack);
+		cout << "----\ncontrol:\n";
+		printStack(controlStack);
+		cout << "\nprogram:\n";
+		printStack(programStack);
 	}
 	cout << "\n";
 	//print the final output
