@@ -107,7 +107,7 @@ void controlStructureHelper (Node* node, queue<cseNode*> &q, int &count, Node* r
 
 	} else {
 		csenode->name = node->name;
-		if(node->name == "<ID:Print>" || node->name == "<ID:Stem>" || node->name == "<ID:Conc>") {
+		if(node->name == "<ID:Print>" || node->name == "<ID:Stem>" || node->name == "<ID:Stern>" || node->name == "<ID:Conc>") {
 			csenode->type = "function";
 		}
 		q.push(csenode);

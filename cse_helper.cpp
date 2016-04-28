@@ -180,19 +180,28 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); //pop the e from prog stack
 			programStack.push(popVal); //push back the top val
 
-		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Stem>") {
+		} else if(nodename == "gamma" && (programStack.top()->name == "<ID:Stem>" || programStack.top()->name == "<ID:Stern>" )) {
 			controlStack.pop(); //pop the gamma
-			programStack.pop(); //pop the stem
+			string func = programStack.top()->name;
+			programStack.pop(); //pop the stem/stern
 			string result = programStack.top()->name;
 			programStack.pop(); //pop the thing to be sterned
 
 			cseNode* node;
 			if(isStr(result)) {
 				result = extractStr(result);
-				node = createCseNode("", "<STR:'" + result.substr(0,1) + "'>");
+				if(func == "<ID:Stem>") {
+					node = createCseNode("", "<STR:'" + result.substr(0,1) + "'>");
+				} else if(func == "<ID:Stern>") {
+					node = createCseNode("", "<STR:'" + result.substr(1, result.length() - 1) + "'>");
+				}
 			} else if(isInt(result)) {
 				result = extractInt(result);
-				node = createCseNode("", "<INT:" + result.substr(0,1) + ">");
+				if(func == "<ID:Stem>") {
+					node = createCseNode("", "<INT:" + result.substr(0,1) + ">");
+				} else if(func == "<ID:Stern>") {
+					node = createCseNode("", "<INT:" + result.substr(1 , result.length() - 1) + ">");
+				}
 			}
 			programStack.push(node);
 
@@ -222,10 +231,10 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			controlStack.pop();
 		}
-		// cout << "----\ncontrol:\n";
-		// printStack(controlStack);
-		// cout << "\nprogram:\n";
-		// printStack(programStack);
+		cout << "----\ncontrol:\n";
+		printStack(controlStack);
+		cout << "\nprogram:\n";
+		printStack(programStack);
 	}
 	cout << "\n";
 	//print the final output
