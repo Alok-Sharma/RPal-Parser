@@ -24,15 +24,7 @@ void evaluate(Node* root) {
 
 	// printDeltas(numOfDelta, deltas);
 	startCseMachine(controlStack, programStack, environs, deltas, numOfDelta);
-
 	// printStack(programStack);
-
-	//------testing------//
-	// cseNode* n1 = createNextEnvironment(environs);
-	// (*environs[0])["Nikita"] = "pudgu";
-	// (*environs[0])["Alok"] = "baby";
-	// cseNode* n2 = createNextEnvironment(environs);
-	// printMap(environs[1]);
 }
 
 void generateControlStructures(Node* node, queue<cseNode*>* deltas[]) {
@@ -169,7 +161,6 @@ cseNode* createNextEnvironment(map<string, cseNode> *environs[], int parentIndex
 
 void loadDelta(stack<cseNode*> &controlStack, int deltaNumber, queue<cseNode*>* deltas[]) {
 	queue<cseNode*> deltaQueue = *deltas[deltaNumber];
-	// cout << "deltas:\n";
 	while(!deltaQueue.empty()) {
 		// cout << deltaQueue.front()->name << "\n";
 		controlStack.push(deltaQueue.front());

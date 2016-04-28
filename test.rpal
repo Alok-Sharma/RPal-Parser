@@ -1,2 +1,1 @@
-let f x = Stern x
-in Print (f '123')
+let a = 1 in a eq 2 -> dummy | (Print (a), Print(a+1))
