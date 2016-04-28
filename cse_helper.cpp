@@ -189,7 +189,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			cseNode* node;
 			if(isStr(result)) {
 				result = extractStr(result);
-				node = createCseNode("", "<STR:" + result.substr(0,1) + ">");
+				node = createCseNode("", "<STR:'" + result.substr(0,1) + "'>");
 			} else if(isInt(result)) {
 				result = extractInt(result);
 				node = createCseNode("", "<INT:" + result.substr(0,1) + ">");
