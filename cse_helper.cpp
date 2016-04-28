@@ -180,6 +180,24 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			programStack.pop(); //pop the e from prog stack
 			programStack.push(popVal); //push back the top val
 
+		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Stem>") {
+			controlStack.pop(); //pop the gamma
+			programStack.pop(); //pop the stem
+			string result = programStack.top()->name;
+			programStack.pop(); //pop the thing to be sterned
+
+			cseNode* node;
+			if(isStr(result)) {
+				result = extractStr(result);
+				result = string(&result[0]);
+				node = createCseNode("", "<STR:" + result + ">");
+			} else if(isInt(result)) {
+				result = extractInt(result);
+				result = string(&result[0]);
+				node = createCseNode("", "<INT:" + result + ">");
+			}
+			programStack.push(node);
+
 		} else if(nodename == "gamma" && programStack.top()->name == "<ID:Print>") {
 			controlStack.pop();
 			programStack.pop();
@@ -202,10 +220,9 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 }
 
 void mPrint(cseNode* node) {
-	string nodetype = node->type;
 	string nodename = node->name;
 	//handle printing a tuple first.
-	if(nodetype == "TUPLE") {
+	if(nodename[0] == '(' && nodename[nodename.length() - 1] == ')') {
 		string commaValues = nodename.substr(1, nodename.length() - 2); //strip the brackets
 		vector<string> result;
 		stringstream ss(commaValues);
