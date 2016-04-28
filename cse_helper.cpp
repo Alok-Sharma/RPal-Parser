@@ -25,7 +25,7 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 			controlStack.pop();
 
 		} else if(nodename == "lambda") {
-			csenode->k = environCount - 1; //update the parent env.
+			csenode->k = environStack.top(); //update the parent env.
 			programStack.push(csenode);
 			lambdas[csenode->i] = csenode;
 			controlStack.pop();
