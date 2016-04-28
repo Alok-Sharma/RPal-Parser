@@ -231,10 +231,10 @@ void startCseMachine(stack<cseNode*> &controlStack, stack<cseNode*> &programStac
 		} else { // TODO: REMOVE THIS. POPPING OFF UNHANDLES TOKENS
 			controlStack.pop();
 		}
-		cout << "----\ncontrol:\n";
-		printStack(controlStack);
-		cout << "\nprogram:\n";
-		printStack(programStack);
+		// cout << "----\ncontrol:\n";
+		// printStack(controlStack);
+		// cout << "\nprogram:\n";
+		// printStack(programStack);
 	}
 	cout << "\n";
 	//print the final output
